@@ -1,5 +1,5 @@
 import Box from "@suid/material/Box";
-import { createSignal, For, onCleanup } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js";
 import Card from "../components/customs/Card";
 import Typography from "@suid/material/Typography";
 import Chip from "@suid/material/Chip";
@@ -10,13 +10,20 @@ import HomeHeader from "@/components/Home/Header";
 import GameRound from "@/components/Home/GameRound";
 import Spacer from "@/components/customs/Spacer";
 import Button from "@suid/material/Button";
+import TextField from "@suid/material/TextField";
+import OutlinedInput from "@suid/material/OutlinedInput";
+import { CheckBox } from "@suid/icons-material";
+import Checkbox from "@suid/material/Checkbox";
+import FormControlLabel from "@suid/material/FormControlLabel";
 
 export default function Home() {
   const [title, setTitle] = createSignal("HolyRPS");
-  const [mode, setMode] = createSignal(1); // mode, 0 = nothing, 1 = classic, 2 = ranking
+  const [mode, setMode] = createSignal(2); // mode, 0 = nothing, 1 = classic, 2 = ranking
   const [games, setGames] = createSignal([1, 3, 5, 7, 9]);
   const [gameRound, setGameRound] = createSignal(games()[0]);
-
+  const [matchRound, setMatchRound] = createSignal(games()[0]);
+  const [isPrivate, setPrivate] = createSignal(false);
+  const [isHost, setHost] = createSignal(false);
   const timer = setInterval(() => {
     // setCount((count) => count + 1);
   }, 10);
@@ -92,6 +99,7 @@ export default function Home() {
                 },
               }}
               onClose={() => alert(0)}
+              onMouseEnter={() => setMode(1)}
             >
               <Box
                 sx={{
@@ -156,7 +164,166 @@ export default function Home() {
               maxWidth="450px"
               onClick={chooseRankingMode}
               selected={mode() === 2}
-            />
+              onMouseEnter={() => setMode(2)}
+              boxProps={{
+                color: "white",
+                sx: {
+                  padding: "1rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  gap: ".5rem",
+                },
+              }}
+            >
+              <Show
+                when={isHost()}
+                fallback={
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h5" component="b" fontWeight={1000}>
+                        HOST OR JOIN?
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      component="b"
+                      fontWeight={500}
+                      align="center"
+                    >
+                      <b>Ranked Mode</b> is a competitive battle against players
+                      around the world, requires network connection for
+                      entrance.
+                    </Typography>
+                    <b style={{ "margin-top": ".5rem" }}>Join Game</b>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: 1,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <OutlinedInput
+                        sx={{ borderRadius: "1200px", background: "white" }}
+                        placeholder="Enter 6 digit code"
+                        size="small"
+                      />
+                      <Button
+                        sx={{ borderRadius: "1000px", fontWeight: 600 }}
+                        variant="contained"
+                      >
+                        JOIN!
+                      </Button>
+                    </Box>
+                    <b>OR</b>
+                    <Spacer />
+                    <Button
+                      sx={{ borderRadius: "1000px", fontWeight: 600 }}
+                      variant="contained"
+                      onClick={() => setHost(true)}
+                      color="success"
+                    >
+                      HOST YOUR GAME!
+                    </Button>
+                  </>
+                }
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    animationDelay: ".1s",
+                  }}
+                  class="animate__animated animate__flipInX"
+                >
+                  <Typography variant="h5" component="b" fontWeight={1000}>
+                    GAME SETUP
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="caption"
+                  component="b"
+                  fontWeight={500}
+                  align="center"
+                  class="animate__animated animate__flipInX"
+                  sx={{ animationDelay: `${2 * 0.05}s` }}
+                >
+                  <b>Host</b>, you can choose whether the game is public or not.
+                </Typography>
+                <b
+                  style={{
+                    "margin-top": ".5rem",
+                    "animation-delay": `${3 * 0.05}s`,
+                  }}
+                  class="animate__animated animate__flipInX"
+                >
+                  ROUNDS
+                </b>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 3,
+                    justifyContent: "center",
+                    animationDelay: `${4 * 0.05}s`,
+                  }}
+                  class="animate__animated animate__flipInX"
+                >
+                  <For each={games()}>
+                    {(item) => (
+                      <GameRound
+                        round={item}
+                        onClick={() => setMatchRound(item)}
+                        isSelected={item === matchRound()}
+                      />
+                    )}
+                  </For>
+                </Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isPrivate()}
+                      onChange={(e, checked) => setPrivate(checked)}
+                    />
+                  }
+                  class="animate__animated animate__flipInX"
+                  sx={{ animationDelay: `${5 * 0.05}s` }}
+                  label="IS PRIVATE"
+                />
+                <Spacer />
+                <Box
+                  class="animate__animated animate__flipInX"
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 1,
+                    animationDelay: `${6 * 0.05}s`,
+                  }}
+                >
+                  <Button
+                    sx={{ borderRadius: "1000px", fontWeight: 600 }}
+                    variant="contained"
+                  >
+                    {matchRound} round{matchRound() < 1 ? "" : "s"}, GO!
+                  </Button>
+                  <Button
+                    sx={{ borderRadius: "1000px", fontWeight: 600 }}
+                    onClick={() => setHost(false)}
+                  >
+                    Back
+                  </Button>
+                </Box>
+              </Show>
+            </ModeCard>
           </Grid>
         </Grid>
       </Container>

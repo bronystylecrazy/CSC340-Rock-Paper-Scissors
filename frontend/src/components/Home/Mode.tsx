@@ -127,33 +127,11 @@ const ModeCard: Component<ModeCardProps> = (props) => {
               inset: 0,
               background: "#333",
               borderRadius: "1rem",
-              border: "3px solid #333",
+              border: "5px solid #333",
               ...modeProps.boxProps?.sx,
             }}
           >
             {props?.children}
-          </Box>
-          <Box
-            sx={{
-              top: `-12px`,
-              right: `-12px`,
-              position: "absolute",
-              borderRadius: "100000px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#ff0062",
-              background: `linear-gradient(to right,  #de00b5  0%, #ff0062  100%)`,
-              color: "white",
-              padding: "1rem",
-              width: "24px",
-              height: "24px",
-              cursor: "pointer",
-            }}
-            onClick={modeProps.onClose as any}
-            {...props}
-          >
-            <b style={{ position: "absolute" }}>x</b>
           </Box>
         </>
       </Show>
