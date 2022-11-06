@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import path from "path";
 
 export default defineConfig({
   plugins: [solidPlugin()],
@@ -11,6 +12,13 @@ export default defineConfig({
   server: {
     port: 1420,
     strictPort: true,
+  },
+  resolve: {
+    alias: {
+      // alias for vite-plugin-solid
+      "@": path.resolve(__dirname, "src"),
+      src: path.resolve(__dirname, "src"),
+    },
   },
   // to make use of `TAURI_DEBUG` and other env variables
   // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand

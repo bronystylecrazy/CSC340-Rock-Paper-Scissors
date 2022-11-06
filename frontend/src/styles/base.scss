@@ -1,0 +1,118 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+
+* {
+  font-family: "Poppins", sans-serif !important;
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+body {
+  padding: 0px;
+  margin: 0px;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background-color: #202020;
+  z-index: -5;
+}
+
+.bg::before {
+  content: "";
+  position: absolute;
+  margin: 0px auto;
+  left: 0px;
+  top: -10%;
+  filter: brightness(1) sepia(1) hue-rotate(220deg) saturate(1);
+  background-image: url("src/assets/grid.svg");
+  opacity: 0.2;
+  -webkit-mask-image: radial-gradient(
+    70% 80% at 50% 50%,
+    black 40%,
+    transparent 70%
+  );
+  width: 100%;
+  height: 120%;
+  z-index: -1;
+}
+
+.bg::after {
+  // position: absolute;
+  // top: 0px;
+  // left: 0px;
+  // content: "";
+  // width: 100%;
+  // height: 100%;
+  // background: linear-gradient(45deg, rgb(255, 255, 255) 0%, rgb(9, 9, 9) 100%);
+  // opacity: 0.2;
+  // z-index: -2;
+  // -webkit-mask-image: radial-gradient(
+  //   70% 80% at 50% 50%,
+  //   black -40%,
+  //   transparent 60%
+  // );
+}
+
+.overlay {
+  // position: fixed;
+  // inset: 0;
+  // background: rgb(0, 0, 0, 0);
+  // background: radial-gradient(
+  //   circle,
+  //   rgba(0, 0, 0, 0) 60%,
+  //   rgba(0, 0, 0, 1) 100%
+  // );
+  // opacity: 0.25;
+}
+
+@keyframes bg {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50vw -50vw;
+  }
+}
+
+@keyframes showIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes showOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.showIn {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: showIn 0.5s ease-in-out forwards;
+}
+
+.popIn {
+  opacity: 0;
+  transform: scale(0.8);
+  animation: showIn 0.5s ease-in-out forwards;
+}

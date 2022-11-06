@@ -1,0 +1,40 @@
+@import url(https://fonts.googleapis.com/css?family=Righteous);
+
+.logo {
+  display: inline-block;
+  color: white;
+  font-family: "Righteous", serif !important;
+  font-size: 10em;
+  text-shadow: 0.03em 0.03em 0 #202020;
+  text-align: center;
+}
+
+.logo:after {
+  content: attr(data-shadow);
+  position: absolute;
+  top: 0.06em;
+  left: 0.06em;
+  z-index: -1;
+  text-shadow: none;
+  background-image: linear-gradient(
+    45deg,
+    transparent 45%,
+    hsla(48, 20%, 90%, 1) 45%,
+    hsla(48, 20%, 90%, 1) 55%,
+    transparent 0
+  );
+  background-size: 0.05em 0.05em;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: shad-anim 180s linear infinite;
+}
+
+@keyframes shad-anim {
+  0% {
+    background-position: 0 0;
+  }
+  0% {
+    background-position: 100% -100%;
+  }
+}
