@@ -44,7 +44,12 @@ const HomeHeader: Component<HomeHeaderProps> = (props) => {
       }}
       {...rest}
     >
-      <Button variant="contained" color="info">
+      <Button
+        variant="contained"
+        color="info"
+        class="animate__animated animate__bounceInDown"
+        sx={{ animationDelay: ".25s" }}
+      >
         <HiSolidQuestionMarkCircle size="32" />
       </Button>
       <Spacer />
@@ -57,7 +62,12 @@ const HomeHeader: Component<HomeHeaderProps> = (props) => {
       </Button> */}
       <Button
         variant="contained"
-        sx={{ background: "#666", "&:hover": { background: "#555" } }}
+        class="animate__animated animate__bounceInDown"
+        sx={{
+          background: "#666",
+          "&:hover": { background: "#555" },
+          animationDelay: ".25s",
+        }}
       >
         <HiSolidCog size="32" />
       </Button>

@@ -23,6 +23,7 @@
     "@suid/icons-material": "^0.4.1",
     "@suid/material": "^0.6.3",
     "@tauri-apps/api": "^1.1.0",
+    "animate.css": "^4.1.1",
     "solid-icons": "^1.0.4",
     "solid-js": "^1.4.7"
   }

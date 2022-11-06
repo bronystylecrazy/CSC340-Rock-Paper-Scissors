@@ -1,43 +1,98 @@
-import Card from "@/components/customs/Card";
+import Card, { CardProps } from "@/components/customs/Card";
+import { randomPick } from "@/utils/mitigate";
+import Box from "@suid/material/Box";
 import Chip from "@suid/material/Chip";
 import Typography from "@suid/material/Typography";
 import { mergeProps } from "solid-js";
 import { Component } from "solid-js";
-
+import {
+  createEffect,
+  createSignal,
+  onCleanup,
+  Show,
+  JSXElement,
+} from "solid-js";
+import { splitProps } from "solid-js";
+import BoxProps from "@suid/material/Box/BoxProps";
 export type ModeCardProps = {
   title?: string;
   description?: string;
   architecture?: string;
   maxWidth?: string;
-};
+  selected?: boolean;
+  exitDuration?: number;
+  children?: JSXElement;
+  boxProps?: BoxProps;
+  onClose?: Function;
+} & CardProps;
 
 const ModeCard: Component<ModeCardProps> = (props) => {
+  const classes = [
+    "tilt-in-fwd-tl",
+    "tilt-in-fwd-tr",
+    "tilt-in-fwd-bl",
+    "tilt-in-fwd-br",
+  ];
+
+  const [chooseClass, setChooseClass] = createSignal(randomPick(classes));
   props = mergeProps(
     {
       title: "{title}",
       description: "{description}",
       architecture: "Local Machine",
       maxWidth: "100%",
+      selected: false,
+      exitDuration: 0,
+      boxProps: {},
+      onClose: () => {},
     },
     props
   );
+
+  const [modeProps, rest] = splitProps(props, [
+    "title",
+    "description",
+    "architecture",
+    "maxWidth",
+    "selected",
+    "exitDuration",
+    "boxProps",
+    "onClose",
+  ]);
+
+  const [visible, setVisible] = createSignal(modeProps.selected);
+
+  createEffect(() => {
+    if (modeProps.selected) {
+      setChooseClass(randomPick(classes));
+      setVisible(true);
+    } else {
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, modeProps.exitDuration);
+      onCleanup(() => {
+        clearTimeout(timer);
+      });
+    }
+  });
 
   return (
     <Card
       sx={{
         width: "100%",
-        maxWidth: props.maxWidth,
+        maxWidth: modeProps.maxWidth,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: ".5rem",
         paddingTop: "3rem",
         paddingBottom: "3rem",
-        cursor: "pointer",
+        position: "relative",
       }}
+      {...rest}
     >
       <Typography variant="h3" sx={{ fontWeight: 800 }}>
-        {props.title}
+        {modeProps.title}
       </Typography>
       <Typography
         variant="subtitle1"
@@ -49,10 +104,10 @@ const ModeCard: Component<ModeCardProps> = (props) => {
         }}
         color="#999"
       >
-        {props.description}
+        {modeProps.description}
       </Typography>
       <Chip
-        label={props.architecture}
+        label={modeProps.architecture}
         sx={{
           marginTop: "1rem",
           fontWeight: "bold",
@@ -61,6 +116,48 @@ const ModeCard: Component<ModeCardProps> = (props) => {
           fontSize: "1rem",
         }}
       />
+      {/* <Box sx={{ transform: "scale(1)" }}> */}
+      <Show when={visible()}>
+        <>
+          <Box
+            class={chooseClass()}
+            {...modeProps.boxProps}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: "#333",
+              borderRadius: "1rem",
+              border: "3px solid #333",
+              ...modeProps.boxProps?.sx,
+            }}
+          >
+            {props?.children}
+          </Box>
+          <Box
+            sx={{
+              top: `-12px`,
+              right: `-12px`,
+              position: "absolute",
+              borderRadius: "100000px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#ff0062",
+              background: `linear-gradient(to right,  #de00b5  0%, #ff0062  100%)`,
+              color: "white",
+              padding: "1rem",
+              width: "24px",
+              height: "24px",
+              cursor: "pointer",
+            }}
+            onClick={modeProps.onClose as any}
+            {...props}
+          >
+            <b style={{ position: "absolute" }}>x</b>
+          </Box>
+        </>
+      </Show>
+      {/* </Box> */}
     </Card>
   );
 };
