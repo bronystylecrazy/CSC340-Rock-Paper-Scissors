@@ -1,8 +1,6 @@
 import Box from "@suid/material/Box";
 import { createSignal, For, onCleanup, Show } from "solid-js";
-import Card from "../components/customs/Card";
 import Typography from "@suid/material/Typography";
-import Chip from "@suid/material/Chip";
 import Container from "@suid/material/Container";
 import ModeCard from "@/components/Home/Mode";
 import Grid from "@suid/material/Grid";
@@ -10,11 +8,10 @@ import HomeHeader from "@/components/Home/Header";
 import GameRound from "@/components/Home/GameRound";
 import Spacer from "@/components/customs/Spacer";
 import Button from "@suid/material/Button";
-import TextField from "@suid/material/TextField";
 import OutlinedInput from "@suid/material/OutlinedInput";
-import { CheckBox } from "@suid/icons-material";
 import Checkbox from "@suid/material/Checkbox";
 import FormControlLabel from "@suid/material/FormControlLabel";
+import { useNavigate } from "@solidjs/router";
 
 export default function Home() {
   const [title, setTitle] = createSignal("HolyRPS");
@@ -24,6 +21,7 @@ export default function Home() {
   const [matchRound, setMatchRound] = createSignal(games()[0]);
   const [isPrivate, setPrivate] = createSignal(false);
   const [isHost, setHost] = createSignal(false);
+  const navigate = useNavigate();
   const timer = setInterval(() => {
     // setCount((count) => count + 1);
   }, 10);
@@ -144,6 +142,7 @@ export default function Home() {
               <Button
                 sx={{ borderRadius: "1000px", fontWeight: 600 }}
                 variant="contained"
+                onClick={() => navigate("/lobby")}
               >
                 {gameRound} round{gameRound() < 1 ? "" : "s"}, GO!
               </Button>
