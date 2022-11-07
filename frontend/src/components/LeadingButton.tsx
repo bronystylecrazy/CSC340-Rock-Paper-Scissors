@@ -10,7 +10,6 @@ const LeadingButton: Component<{ backToPath: string; path: string }> = (
   return (
     <Box
       sx={{
-        // position: "fixed",
         width: "100%",
         height: "60px",
         padding: "1rem",

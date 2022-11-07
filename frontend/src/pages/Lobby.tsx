@@ -5,7 +5,7 @@ import Typography from "@suid/material/Typography";
 import { createSignal } from "solid-js";
 
 export default function Lobby() {
-  const [timer, setTimer] = createSignal(3);
+  const [timer, setTimer] = createSignal(2);
   const [isFirstPlayerReady, setIsFirstPlayerReady] = createSignal(false);
   const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(true);
 
@@ -14,7 +14,7 @@ export default function Lobby() {
       <LeadingButton backToPath="Home" path="/" />
       <Box sx={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
         <Typography sx={{ fontWeight: "bold", color: "#FE7575" }} variant="h5">
-          Game will start in {timer()} seconds
+          Game will start in {timer()} second{timer() > 1 ? "s" : ""}
         </Typography>
       </Box>
       <Container
