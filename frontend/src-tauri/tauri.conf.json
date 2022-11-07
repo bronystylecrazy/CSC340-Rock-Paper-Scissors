@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "CSC340-Rock-Paper-Scissors",
+    "productName": "HolyRPS",
     "version": "0.0.0"
   },
   "tauri": {
@@ -58,7 +58,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "CSC340-Rock-Paper-Scissors",
+        "title": "HolyRPS",
         "width": 800
       }
     ]
