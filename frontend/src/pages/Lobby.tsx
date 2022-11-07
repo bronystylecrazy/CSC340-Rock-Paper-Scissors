@@ -23,7 +23,8 @@ export default function Lobby() {
           height: "calc(100vh - 200px)",
           backgroundColor: "white",
           borderRadius: "10px",
-          padding: "2rem",
+          px: "2rem",
+          py: "1.5rem",
         }}
       >
         <Box
@@ -35,7 +36,7 @@ export default function Lobby() {
             height: "100%",
           }}
         >
-          <Typography sx={{ fontWeight: "bolder" }} variant="h6">
+          <Typography sx={{ fontWeight: "bolder", mb: 2 }} variant="h6">
             Show your scissors gesture in front of your camera
           </Typography>
           <Box sx={{ height: "85%", width: "100%" }}>
