@@ -17,7 +17,7 @@ import onlinePlayBg from "src/assets/online-play.png";
 
 export default function Home() {
   const [title, setTitle] = createSignal("HolyRPS");
-  const [mode, setMode] = createSignal(2); // mode, 0 = nothing, 1 = classic, 2 = ranking
+  const [mode, setMode] = createSignal(0); // mode, 0 = nothing, 1 = classic, 2 = ranking
   const [games, setGames] = createSignal([1, 3, 5, 7, 9]);
   const [gameRound, setGameRound] = createSignal(games()[0]);
   const [matchRound, setMatchRound] = createSignal(games()[0]);
