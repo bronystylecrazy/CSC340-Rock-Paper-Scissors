@@ -25,12 +25,20 @@ Usage - formats:
                                  yolov5s_paddle_model       # PaddlePaddle
 """
 
+import json
+from utils.torch_utils import select_device, smart_inference_mode
+from utils.plots import Annotator, colors, save_one_box
+from utils.general import (LOGGER, Profile, check_file, check_img_size, check_imshow, check_requirements, colorstr, cv2,
+                           increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
+from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
+from models.common import DetectMultiBackend
 import argparse
 import os
 import platform
 import sys
 from pathlib import Path
-
+import websockets
+import asyncio
 import torch
 
 FILE = Path(__file__).resolve()
@@ -39,44 +47,48 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-from models.common import DetectMultiBackend
-from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
-from utils.general import (LOGGER, Profile, check_file, check_img_size, check_imshow, check_requirements, colorstr, cv2,
-                           increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
-from utils.plots import Annotator, colors, save_one_box
-from utils.torch_utils import select_device, smart_inference_mode
+
+async def handler(websocket):
+    run(**vars(opt))
+    while True:
+        message = await websocket.recv()
+        print(message)
+
+
+async def startWebsocket():
+    async with websockets.serve(run, "127.0.0.1", 8001):
+        await asyncio.Future()  # run forever
 
 
 @smart_inference_mode()
-def run(
-        weights=ROOT / 'yolov5s.pt',  # model path or triton URL
-        source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
-        data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.25,  # confidence threshold
-        iou_thres=0.45,  # NMS IOU threshold
-        max_det=1000,  # maximum detections per image
-        device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=False,  # show results
-        save_txt=False,  # save results to *.txt
-        save_conf=False,  # save confidences in --save-txt labels
-        save_crop=False,  # save cropped prediction boxes
-        nosave=False,  # do not save images/videos
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
-        agnostic_nms=False,  # class-agnostic NMS
-        augment=False,  # augmented inference
-        visualize=False,  # visualize features
-        update=False,  # update all models
-        project=ROOT / 'runs/detect',  # save results to project/name
-        name='exp',  # save results to project/name
-        exist_ok=False,  # existing project/name ok, do not increment
-        line_thickness=3,  # bounding box thickness (pixels)
-        hide_labels=False,  # hide labels
-        hide_conf=False,  # hide confidences
-        half=False,  # use FP16 half-precision inference
-        dnn=False,  # use OpenCV DNN for ONNX inference
-        vid_stride=1,  # video frame-rate stride
-):
+async def run(websocket):
+    weights = 'best.pt'  # model path or triton URL
+    source = 0  # file/dir/URL/glob/screen/0(webcam)
+    data = 'data/coco128.yaml'  # dataset.yaml path
+    imgsz = (640, 640)  # inference size (height, width)
+    conf_thres = 0.25  # confidence threshold
+    iou_thres = 0.45  # NMS IOU threshold
+    max_det = 1000  # maximum detections per image
+    device = ''  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+    view_img = False  # show results
+    save_txt = False  # save results to *.txt
+    save_conf = False  # save confidences in --save-txt labels
+    save_crop = False  # save cropped prediction boxes
+    nosave = False  # do not save images/videos
+    classes = None  # filter by class: --class 0, or --class 0 2 3
+    agnostic_nms = False  # class-agnostic NMS
+    augment = False  # augmented inference
+    visualize = False  # visualize features
+    update = False  # update all models
+    project = 'runs/detect'  # save results to project/name
+    name = 'exp'  # save results to project/name
+    exist_ok = False  # existing project/name ok, do not increment
+    line_thickness = 3  # bounding box thickness (pixels)
+    hide_labels = False  # hide labels
+    hide_conf = False  # hide confidences
+    half = False  # use FP16 half-precision inference
+    dnn = False  # use OpenCV DNN for ONNX inference
+    vid_stride = 1  # video frame-rate stride
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -101,6 +113,9 @@ def run(
     if webcam:
         view_img = check_imshow(warn=True)
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
+
+        await websocket.send(json.dumps({"source": "webcam", "size": {"width": len(dataset.imgs[0][0]),
+                                                                      "height": len(dataset.imgs[0])}}))
         bs = len(dataset)
     elif screenshot:
         dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
@@ -175,45 +190,14 @@ def run(
                             "x": int(xyxy[0]),
                             "y": int(xyxy[1]),
                             "width": int(xyxy[2] - xyxy[0]),
-                            "height": int(xyxy[3] - xyxy[1]),
-                            "size": {
-                                "width": im0.shape[1],
-                                "height": im0.shape[0]
-                            }
+                            "height": int(xyxy[3] - xyxy[1])
                         })
                         annotator.box_label(xyxy, label, color=colors(c, True))
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
-            print(response) # TODO websocket send data
-            # Stream results
-            im0 = annotator.result()
-            if view_img:
-                if platform.system() == 'Linux' and p not in windows:
-                    windows.append(p)
-                    cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
-                    cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
-                cv2.imshow(str(p), im0)
-                cv2.waitKey(1)  # 1 millisecond
-
-            # Save results (image with detections)
-            if save_img:
-                if dataset.mode == 'image':
-                    cv2.imwrite(save_path, im0)
-                else:  # 'video' or 'stream'
-                    if vid_path[i] != save_path:  # new video
-                        vid_path[i] = save_path
-                        if isinstance(vid_writer[i], cv2.VideoWriter):
-                            vid_writer[i].release()  # release previous video writer
-                        if vid_cap:  # video
-                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                            w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                            h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                        else:  # stream
-                            fps, w, h = 30, im0.shape[1], im0.shape[0]
-                        save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
-                        vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-                    vid_writer[i].write(im0)
-
+            # TODO websocket send data
+            if response != []:
+                await websocket.send(json.dumps(response))
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
@@ -264,7 +248,7 @@ def parse_opt():
 
 def main(opt):
     check_requirements(exclude=('tensorboard', 'thop'))
-    run(**vars(opt))
+    asyncio.run(startWebsocket())
 
 
 if __name__ == "__main__":
