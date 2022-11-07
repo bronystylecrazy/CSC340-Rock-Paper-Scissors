@@ -12,6 +12,8 @@ import OutlinedInput from "@suid/material/OutlinedInput";
 import Checkbox from "@suid/material/Checkbox";
 import FormControlLabel from "@suid/material/FormControlLabel";
 import { useNavigate } from "@solidjs/router";
+import localPlayBg from "src/assets/local-play.png";
+import onlinePlayBg from "src/assets/online-play.png";
 
 export default function Home() {
   const [title, setTitle] = createSignal("HolyRPS");
@@ -73,7 +75,7 @@ export default function Home() {
               style={{ "animation-delay": ".5s" }}
             >
               Welcome,{" "}
-              <b style={{ color: "yellowgreen" }}>Sirait Pratoomsuwan</b>
+              <b style={{ color: "yellowgreen" }}>Sirawit Pratoomsuwan</b>
             </h2>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -85,6 +87,7 @@ export default function Home() {
               maxWidth="450px"
               onClick={chooseClassicMode}
               selected={mode() === 1}
+              backgroundUrl={localPlayBg}
               boxProps={{
                 color: "white",
                 sx: {
@@ -164,6 +167,7 @@ export default function Home() {
               onClick={chooseRankingMode}
               selected={mode() === 2}
               onMouseEnter={() => setMode(2)}
+              backgroundUrl={onlinePlayBg}
               boxProps={{
                 color: "white",
                 sx: {

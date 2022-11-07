@@ -24,6 +24,7 @@ export type ModeCardProps = {
   children?: JSXElement;
   boxProps?: BoxProps;
   onClose?: Function;
+  backgroundUrl?: string;
 } & CardProps;
 
 const ModeCard: Component<ModeCardProps> = (props) => {
@@ -57,6 +58,7 @@ const ModeCard: Component<ModeCardProps> = (props) => {
     "selected",
     "exitDuration",
     "boxProps",
+    "backgroundUrl",
     "onClose",
   ]);
 
@@ -88,6 +90,8 @@ const ModeCard: Component<ModeCardProps> = (props) => {
         paddingTop: "3rem",
         paddingBottom: "3rem",
         position: "relative",
+        backgroundImage: `url(${modeProps.backgroundUrl})`,
+        backgroundSize: "cover",
       }}
       {...rest}
     >
@@ -102,7 +106,7 @@ const ModeCard: Component<ModeCardProps> = (props) => {
           fontFamily: "Poppins",
           maxWidth: "80%",
         }}
-        color="#999"
+        // color="#999"
       >
         {modeProps.description}
       </Typography>
@@ -114,6 +118,8 @@ const ModeCard: Component<ModeCardProps> = (props) => {
           padding: "1.5rem",
           borderRadius: "10000px",
           fontSize: "1rem",
+          color: "#fff",
+          backgroundColor: "rgba(0,0,0,0.9)",
         }}
       />
       {/* <Box sx={{ transform: "scale(1)" }}> */}
