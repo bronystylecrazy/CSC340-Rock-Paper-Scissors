@@ -92,6 +92,7 @@ const ModeCard: Component<ModeCardProps> = (props) => {
         position: "relative",
         backgroundImage: `url(${modeProps.backgroundUrl})`,
         backgroundSize: "cover",
+        borderRadius: "1.8rem",
       }}
       {...rest}
     >
