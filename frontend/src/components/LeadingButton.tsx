@@ -27,7 +27,7 @@ const LeadingButton: Component<{ backToPath: string; path: string }> = (
             color: "white",
           }}
         >
-          <FaSolidArrowLeft size="24" />
+          <FaSolidArrowLeft size="16" />
           <Box mx={0.5} />
           <Typography>{props.backToPath}</Typography>
         </Box>
