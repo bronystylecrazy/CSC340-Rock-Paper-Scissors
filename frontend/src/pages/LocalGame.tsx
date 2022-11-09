@@ -5,7 +5,8 @@ import Typography from "@suid/material/Typography";
 import CircleIcon from "@suid/icons-material/Circle";
 import CircleOutlinedIcon from "@suid/icons-material/CircleOutlined";
 import Checkbox from "@suid/material/Checkbox";
-import { createEffect } from "solid-js";
+import { createEffect, createSignal, For } from "solid-js";
+import { Label } from "@/types/label";
 
 const LocalGame = () => {
   const constraints = {
@@ -13,6 +14,11 @@ const LocalGame = () => {
     height: { min: 400, ideal: 720 },
     aspectRatio: { ideal: 1.7777777778 },
   };
+  const [rec, setRec] = createSignal<Label[]>([]);
+  const socket = new WebSocket("ws://localhost:8001");
+  socket.addEventListener("message", (event) => {
+    setRec(JSON.parse(event.data));
+  });
   const openCamera = async () => {
     var video: HTMLVideoElement = document.getElementById(
         "video"
@@ -22,10 +28,6 @@ const LocalGame = () => {
       navigator.mediaDevices
         .getUserMedia({
           video: constraints,
-          audio: {
-            sampleSize: 16,
-            channelCount: 2,
-          },
         })
         .then((stream) => {
           video.srcObject = stream;
@@ -62,12 +64,10 @@ const LocalGame = () => {
       </Box>
       <Container
         sx={{
-          width: "100%",
-          height: "100%",
-          borderRadius: "10px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: "0 !important",
         }}
       >
         <video
@@ -78,6 +78,49 @@ const LocalGame = () => {
             height: "100%",
           }}
         ></video>
+        <For each={rec()}>
+          {(item) => (
+            <>
+              <Typography
+                position="absolute"
+                top={item.y * 0.9375 - 25}
+                left={item.x * 0.9375}
+                backgroundColor="rgba(255,255,255,0.5)"
+                px={2}
+                sx={{
+                  color:
+                    item.label == "rock"
+                      ? "#FA4141"
+                      : item.label == "paper"
+                      ? "#557153"
+                      : item.label == "scissors"
+                      ? "#8D72E1"
+                      : "#000000",
+                }}
+              >
+                {item.label}
+              </Typography>
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: item.width * 0.9375,
+                  height: item.height * 0.9375,
+                  top: item.y * 0.9375,
+                  left: item.x * 0.9375,
+                  border: "3px solid",
+                  borderColor:
+                    item.label == "rock"
+                      ? "#FA4141"
+                      : item.label == "paper"
+                      ? "#557153"
+                      : item.label == "scissors"
+                      ? "#8D72E1"
+                      : "#000000",
+                }}
+              ></Box>
+            </>
+          )}
+        </For>
         <Box
           sx={{
             position: "absolute",

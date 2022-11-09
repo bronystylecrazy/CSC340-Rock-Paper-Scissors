@@ -1,17 +1,22 @@
 import LeadingButton from "@/components/LeadingButton";
 import Box from "@suid/material/Box";
-import Button from "@suid/material/Button";
 import Container from "@suid/material/Container";
 import Typography from "@suid/material/Typography";
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, For } from "solid-js";
 import { A } from "@solidjs/router";
+import { Label } from "@/types/label";
 
 export default function Lobby() {
   const constraints = {
-    width: { min: 640, ideal: 1280 },
-    height: { min: 400, ideal: 720 },
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
     aspectRatio: { ideal: 1.7777777778 },
   };
+  const [rec, setRec] = createSignal<Label[]>([]);
+  const socket = new WebSocket("ws://localhost:8001");
+  socket.addEventListener("message", (event) => {
+    setRec(JSON.parse(event.data));
+  });
 
   const openCamera = async () => {
     var video: HTMLVideoElement = document.getElementById(
@@ -22,10 +27,6 @@ export default function Lobby() {
       navigator.mediaDevices
         .getUserMedia({
           video: constraints,
-          audio: {
-            sampleSize: 16,
-            channelCount: 2,
-          },
         })
         .then((stream) => {
           video.srcObject = stream;
@@ -50,32 +51,81 @@ export default function Lobby() {
         flexDirection: "column",
       }}
     >
-      <LeadingButton backToPath="Home" path="/" />
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <LeadingButton backToPath="Home" path="/" />
+        <A
+          href="/game/local"
+          style={{ "margin-right": "24px", color: "white" }}
+        >
+          Game
+        </A>
+      </Box>
+
       <Box sx={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
         <Typography sx={{ fontWeight: "bold", color: "#FA4141" }} variant="h5">
-          <A href="/game/local">
-            Game will start in {timer()} second{timer() > 1 ? "s" : ""}
-          </A>
+          Game will start in {timer()} second{timer() > 1 ? "s" : ""}
         </Typography>
       </Box>
       <Container
         sx={{
-          width: "100%",
-          height: "100%",
-          borderRadius: "10px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: "0 !important",
         }}
       >
         <video
           id="video"
           autoplay
           style={{
+            position: "relative",
             width: "100%",
             height: "100%",
           }}
         ></video>
+        <For each={rec()}>
+          {(item) => (
+            <>
+              <Typography
+                position="absolute"
+                top={item.y * 0.9375 - 25}
+                left={item.x * 0.9375}
+                backgroundColor="rgba(255,255,255,0.5)"
+                px={2}
+                sx={{
+                  color:
+                    item.label == "rock"
+                      ? "#FA4141"
+                      : item.label == "paper"
+                      ? "#557153"
+                      : item.label == "scissors"
+                      ? "#8D72E1"
+                      : "#000000",
+                }}
+              >
+                {item.label}
+              </Typography>
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: item.width * 0.9375,
+                  height: item.height * 0.9375,
+                  top: item.y * 0.9375,
+                  left: item.x * 0.9375,
+                  border: "3px solid",
+                  borderColor:
+                    item.label == "rock"
+                      ? "#FA4141"
+                      : item.label == "paper"
+                      ? "#557153"
+                      : item.label == "scissors"
+                      ? "#8D72E1"
+                      : "#000000",
+                }}
+              ></Box>
+            </>
+          )}
+        </For>
         <Box
           sx={{
             position: "absolute",

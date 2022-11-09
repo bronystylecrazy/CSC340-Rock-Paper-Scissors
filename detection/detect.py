@@ -196,8 +196,8 @@ async def run(websocket):
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
             # TODO websocket send data
-            if response != []:
-                await websocket.send(json.dumps(response))
+            # if response != []:
+            await websocket.send(json.dumps(response))
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
