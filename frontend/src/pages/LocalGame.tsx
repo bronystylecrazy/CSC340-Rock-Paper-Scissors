@@ -7,6 +7,9 @@ import CircleOutlinedIcon from "@suid/icons-material/CircleOutlined";
 import Checkbox from "@suid/material/Checkbox";
 import { createEffect, createSignal, For } from "solid-js";
 import { Label } from "@/types/label";
+import Button from "@suid/material/Button";
+import { A, useParams } from "@solidjs/router";
+import { FaSolidArrowRight } from "solid-icons/fa";
 
 const LocalGame = () => {
   const constraints = {
@@ -15,6 +18,7 @@ const LocalGame = () => {
     aspectRatio: { ideal: 1.7777777778 },
   };
   const [rec, setRec] = createSignal<Label[]>([]);
+  const [gameFinish, setGameFinish] = createSignal(false);
   const socket = new WebSocket("ws://localhost:8001");
   socket.addEventListener("message", (event) => {
     setRec(JSON.parse(event.data));
@@ -42,14 +46,59 @@ const LocalGame = () => {
   }, []);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <LeadingButton backToPath="Home" path="/" />
+    <Box
+      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+        }}
+      >
+        <LeadingButton backToPath="Home" path="/" />
+        <Box
+          sx={{
+            width: "100%",
+            height: "60px",
+            padding: "1rem",
+            display: "flex",
+            justifyContent: "end",
+          }}
+        >
+          <A href="/summary" style={{ "text-decoration": "none" }}>
+            <Box
+              sx={{
+                display: "flex",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "start",
+                color: "white",
+              }}
+            >
+              <Typography>Summary</Typography>
+              <Box mx={0.5} />
+              <FaSolidArrowRight size="16" />
+            </Box>
+          </A>
+        </Box>
+      </Box>
+      <Button
+        onClick={() => {
+          setGameFinish(!gameFinish());
+        }}
+        sx={{
+          position: "absolute",
+        }}
+      >
+        Finish
+      </Button>
       <Box
         sx={{
           display: "flex",
+          width: "100%",
           justifyContent: "space-between",
           margin: "20px 0",
-          px: "9rem",
+          px: "5rem",
         }}
       >
         <Typography sx={{ fontWeight: 500, color: "#fff" }} variant="h6">
@@ -74,10 +123,32 @@ const LocalGame = () => {
           id="video"
           autoplay
           style={{
-            width: "100%",
-            height: "100%",
+            width: "1280px",
+            height: "720px",
           }}
         ></video>
+        {gameFinish() && (
+          <Box
+            sx={{
+              position: "absolute",
+              width: "1280px",
+              height: "720px",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              zIndex: 1000,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography color="white" variant="h3" fontWeight={500}>
+              Player 1 Won
+            </Typography>
+            <Typography mt={3} color="white" variant="h1" fontWeight={500}>
+              3 : 2
+            </Typography>
+          </Box>
+        )}
         <For each={rec()}>
           {(item) => (
             <>

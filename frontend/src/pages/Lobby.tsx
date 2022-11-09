@@ -3,8 +3,9 @@ import Box from "@suid/material/Box";
 import Container from "@suid/material/Container";
 import Typography from "@suid/material/Typography";
 import { createSignal, createEffect, For } from "solid-js";
-import { A } from "@solidjs/router";
+import { A, useParams } from "@solidjs/router";
 import { Label } from "@/types/label";
+import Button from "@suid/material/Button";
 
 export default function Lobby() {
   const constraints = {
@@ -12,7 +13,14 @@ export default function Lobby() {
     height: { ideal: 720 },
     aspectRatio: { ideal: 1.7777777778 },
   };
+  const params = useParams();
+
   const [rec, setRec] = createSignal<Label[]>([]);
+  const [timer, setTimer] = createSignal(3);
+  const [isFirstPlayerReady, setIsFirstPlayerReady] = createSignal(false);
+  const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(false);
+  let timerInterval: any;
+
   const socket = new WebSocket("ws://localhost:8001");
   socket.addEventListener("message", (event) => {
     setRec(JSON.parse(event.data));
@@ -36,33 +44,57 @@ export default function Lobby() {
       console.log(error);
     }
   };
+
+  const timerFunction = () => {
+    if (timer() === 0) {
+      clearInterval(timerInterval);
+    } else {
+      setTimer(timer() - 1);
+    }
+  };
+  const countdownTimer = () => {
+    timerInterval = setInterval(timerFunction, 1000);
+  };
+
   createEffect(() => {
     openCamera();
   }, []);
+  createEffect(() => {
+    if (rec().length > 0) {
+      if (rec()[0].label == "scissors" && rec()[0].x <= 440) {
+        setIsFirstPlayerReady(true);
+      } else if (rec()[0].label == "scissors" && rec()[0].x > 640) {
+        setIsSecondPlayerReady(true);
+      }
+    }
+  }, [rec]);
 
-  const [timer, setTimer] = createSignal(3);
-  const [isFirstPlayerReady, setIsFirstPlayerReady] = createSignal(false);
-  const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(true);
+  createEffect(() => {
+    if (isFirstPlayerReady() && isSecondPlayerReady()) {
+      countdownTimer();
+    }
+  }, [isFirstPlayerReady, isSecondPlayerReady]);
+
+  console.log(params.round);
 
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <LeadingButton backToPath="Home" path="/" />
-        <A
-          href="/game/local"
-          style={{ "margin-right": "24px", color: "white" }}
-        >
-          Game
-        </A>
-      </Box>
+      <LeadingButton backToPath="Home" path="/" />
+      {/* <Button onClick={countdownTimer}>Press Me</Button> */}
+      <A href="/game/local" style={{ color: "white", position: "absolute" }}>
+        Game
+      </A>
 
-      <Box sx={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
-        <Typography sx={{ fontWeight: "bold", color: "#FA4141" }} variant="h5">
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}
+      >
+        <Typography sx={{ fontWeight: "bold", color: "#FE7575" }} variant="h5">
           Game will start in {timer()} second{timer() > 1 ? "s" : ""}
         </Typography>
       </Box>
@@ -79,8 +111,8 @@ export default function Lobby() {
           autoplay
           style={{
             position: "relative",
-            width: "100%",
-            height: "100%",
+            width: "1280px",
+            height: "720px",
           }}
         ></video>
         <For each={rec()}>
@@ -151,11 +183,12 @@ export default function Lobby() {
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 1,
-                backgroundColor: "rgba(0,0,0,0.1)",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                color: "white",
               }}
               variant="h6"
             >
-              Show your scissors gesture in front of your camera
+              Show your 'SCISSORS' gesture in front of your camera
             </Typography>
 
             <Box sx={{ height: "85%", width: "100%" }}>
@@ -232,6 +265,9 @@ export default function Lobby() {
           </Box>
         </Box>
       </Container>
+      <Typography color="white" mt={2}>
+        *Hint: Place your hand horizontally*
+      </Typography>
     </Box>
   );
 }

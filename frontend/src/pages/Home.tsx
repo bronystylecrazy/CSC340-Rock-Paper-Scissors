@@ -1,5 +1,5 @@
 import Box from "@suid/material/Box";
-import { createSignal, For, onCleanup, Show } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import Typography from "@suid/material/Typography";
 import Container from "@suid/material/Container";
 import ModeCard from "@/components/Home/Mode";
@@ -145,7 +145,7 @@ export default function Home() {
               <Button
                 sx={{ borderRadius: "1000px", fontWeight: 600 }}
                 variant="contained"
-                onClick={() => navigate("/lobby")}
+                onClick={() => navigate("/lobby/" + gameRound())}
               >
                 {gameRound} round{gameRound() < 1 ? "" : "s"}, GO!
               </Button>
