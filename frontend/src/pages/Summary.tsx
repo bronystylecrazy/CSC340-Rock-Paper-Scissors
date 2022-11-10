@@ -2,17 +2,18 @@ import scissorsIcon from "../assets/scissors.png";
 import paperIcon from "../assets/paper.png";
 import rockIcon from "../assets/rock.png";
 import Box from "@suid/material/Box";
-import LeadingButton from "@/components/LeadingButton";
 import Grid from "@suid/material/Grid";
 import { For } from "solid-js";
 import Typography from "@suid/material/Typography";
+import Button from "@suid/material/Button";
+import { useNavigate } from "@solidjs/router";
 
 const Summary = () => {
+  const navigate = useNavigate();
   const round = [1, 2, 3, 4, 5];
-  const player1Stat = "win";
-  const player2Stat = "lose";
   const player1 = {
     name: "Player 1",
+    result: "win",
     round: [
       {
         result: "win",
@@ -38,6 +39,7 @@ const Summary = () => {
   };
   const player2 = {
     name: "Player 2",
+    result: "lose",
     round: [
       {
         result: "lose",
@@ -63,20 +65,20 @@ const Summary = () => {
   };
   return (
     <>
-      <LeadingButton backToPath="Home" path="/" />
       <Box
         sx={{
           width: "100vw",
-          height: "90vh",
+          height: "100vh",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          justifyContent: "space-evenly",
           alignItems: "center",
         }}
       >
         <Box
           sx={{
             width: "80%",
-            height: "90%",
+            height: "80%",
             backgroundColor: "#D9D9D9",
             borderRadius: 2,
           }}
@@ -85,7 +87,7 @@ const Summary = () => {
             container
             pt={2}
             pb={2}
-            pr={2}
+            px={2}
             backgroundColor="#C2C8D8"
             sx={{
               borderTopLeftRadius: 8,
@@ -111,7 +113,7 @@ const Summary = () => {
               justifyContent: "space-evenly",
             }}
           >
-            <Grid container pr={2}>
+            <Grid container px={2}>
               <Grid
                 item
                 xs={2}
@@ -127,8 +129,13 @@ const Summary = () => {
                     px: 2,
                     py: 0.5,
                     borderRadius: 2,
+                    border: "2px solid",
+                    borderColor:
+                      player1.result == "win" ? "#1CB462" : "#FF9B9B",
                     backgroundColor:
-                      player1Stat == "win" ? "#1CB462" : "#FF9B9B",
+                      player1.result == "win"
+                        ? "rgba(28, 180, 98, 0.4)"
+                        : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
                   {player1.name}
@@ -188,7 +195,7 @@ const Summary = () => {
                 )}
               </For>
             </Grid>
-            <Grid container pr={2}>
+            <Grid container px={2}>
               <Grid
                 item
                 xs={2}
@@ -204,8 +211,13 @@ const Summary = () => {
                     px: 2,
                     py: 0.5,
                     borderRadius: 2,
+                    border: "2px solid",
+                    borderColor:
+                      player2.result == "win" ? "#1CB462" : "#FF9B9B",
                     backgroundColor:
-                      player2Stat == "win" ? "#1CB462" : "#FF9B9B",
+                      player2.result == "win"
+                        ? "rgba(28, 180, 98, 0.4)"
+                        : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
                   {player2.name}
@@ -267,8 +279,16 @@ const Summary = () => {
             </Grid>
           </Box>
         </Box>
+        <Button
+          onClick={() => {
+            navigate("/", { replace: true });
+          }}
+          color="info"
+          variant="contained"
+        >
+          <Typography variant="h6">Back to home</Typography>
+        </Button>
       </Box>
-      {/* <img src={scissorsIcon} alt="" /> */}
     </>
   );
 };

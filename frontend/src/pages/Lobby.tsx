@@ -2,7 +2,7 @@ import LeadingButton from "@/components/LeadingButton";
 import Box from "@suid/material/Box";
 import Container from "@suid/material/Container";
 import Typography from "@suid/material/Typography";
-import { createSignal, createEffect, For } from "solid-js";
+import { createSignal, createEffect, For, onMount, onCleanup } from "solid-js";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Label } from "@/types/label";
 
@@ -20,11 +20,6 @@ export default function Lobby() {
   const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(false);
   let timerInterval: any;
   const navigate = useNavigate();
-
-  const socket = new WebSocket("ws://localhost:8001");
-  socket.addEventListener("message", (event) => {
-    setRec(JSON.parse(event.data));
-  });
 
   const openCamera = async () => {
     var video: HTMLVideoElement = document.getElementById(
@@ -62,9 +57,24 @@ export default function Lobby() {
     clearInterval(timerInterval);
   };
 
-  createEffect(() => {
+  const socket = new WebSocket("ws://localhost:8001");
+  onMount(() => {
     openCamera();
-  }, []);
+    try {
+      socket.addEventListener("message", (event) => {
+        setRec(JSON.parse(event.data));
+      });
+      console.log("success");
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  onCleanup(() => {
+    socket.send("close");
+    socket.close();
+  });
+
   createEffect(() => {
     var left: Label[] = [];
     var right: Label[] = [];
@@ -114,8 +124,6 @@ export default function Lobby() {
       resetTimer();
     }
   }, [isFirstPlayerReady, isSecondPlayerReady]);
-
-  console.log(params.round);
 
   return (
     <Box

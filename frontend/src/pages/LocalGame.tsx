@@ -5,7 +5,7 @@ import Typography from "@suid/material/Typography";
 import CircleIcon from "@suid/icons-material/Circle";
 import CircleOutlinedIcon from "@suid/icons-material/CircleOutlined";
 import Checkbox from "@suid/material/Checkbox";
-import { createEffect, createSignal, For } from "solid-js";
+import { createEffect, createSignal, For, onMount } from "solid-js";
 import { Label } from "@/types/label";
 import Button from "@suid/material/Button";
 import { A, useParams } from "@solidjs/router";
@@ -19,10 +19,7 @@ const LocalGame = () => {
   };
   const [rec, setRec] = createSignal<Label[]>([]);
   const [gameFinish, setGameFinish] = createSignal(false);
-  const socket = new WebSocket("ws://localhost:8001");
-  socket.addEventListener("message", (event) => {
-    setRec(JSON.parse(event.data));
-  });
+
   const openCamera = async () => {
     var video: HTMLVideoElement = document.getElementById(
         "video"
@@ -41,9 +38,14 @@ const LocalGame = () => {
       console.log(error);
     }
   };
-  createEffect(() => {
+  onMount(() => {
+    console.log("onMount");
     openCamera();
-  }, []);
+    const socket = new WebSocket("ws://localhost:8001");
+    socket.addEventListener("message", (event) => {
+      setRec(JSON.parse(event.data));
+    });
+  });
 
   return (
     <Box
@@ -117,7 +119,7 @@ const LocalGame = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "0 !important",
+          transform: "scaleX(-1)",
         }}
       >
         <video
@@ -140,6 +142,7 @@ const LocalGame = () => {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
+              transform: "scaleX(-1)",
             }}
           >
             <Typography color="white" variant="h3" fontWeight={500}>
@@ -168,6 +171,7 @@ const LocalGame = () => {
                       : item.label == "scissors"
                       ? "#8D72E1"
                       : "#000000",
+                  transform: "scaleX(-1)",
                 }}
               >
                 {item.label}
@@ -180,6 +184,7 @@ const LocalGame = () => {
                   top: item.y,
                   left: item.x,
                   border: "3px solid",
+                  transform: "scaleX(-1)",
                   borderColor:
                     item.label == "rock"
                       ? "#FA4141"
@@ -198,6 +203,7 @@ const LocalGame = () => {
             position: "absolute",
             zIndex: 1,
             mt: 2,
+            transform: "scaleX(-1)",
           }}
         >
           <Box
@@ -221,7 +227,7 @@ const LocalGame = () => {
                 checkedIcon={<CircleIcon />}
                 sx={{
                   "&.Mui-checked": {
-                    color: "#959292",
+                    color: "#38C149",
                   },
                 }}
               />
