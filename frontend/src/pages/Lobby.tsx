@@ -3,7 +3,7 @@ import Box from "@suid/material/Box";
 import Container from "@suid/material/Container";
 import Typography from "@suid/material/Typography";
 import { createSignal, createEffect, For } from "solid-js";
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { Label } from "@/types/label";
 
 export default function Lobby() {
@@ -19,6 +19,7 @@ export default function Lobby() {
   const [isFirstPlayerReady, setIsFirstPlayerReady] = createSignal(false);
   const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(false);
   let timerInterval: any;
+  const navigate = useNavigate();
 
   const socket = new WebSocket("ws://localhost:8001");
   socket.addEventListener("message", (event) => {
@@ -47,6 +48,7 @@ export default function Lobby() {
   const timerFunction = () => {
     if (timer() === 0) {
       clearInterval(timerInterval);
+      navigate(`/game/${params.round}`, { replace: true });
     } else {
       setTimer(timer() - 1);
     }
@@ -55,22 +57,61 @@ export default function Lobby() {
     timerInterval = setInterval(timerFunction, 1000);
   };
 
+  const resetTimer = () => {
+    setTimer(3);
+    clearInterval(timerInterval);
+  };
+
   createEffect(() => {
     openCamera();
   }, []);
   createEffect(() => {
-    if (rec().length > 0) {
-      if (rec()[0].label == "scissors" && rec()[0].x <= 440) {
-        setIsFirstPlayerReady(true);
-      } else if (rec()[0].label == "scissors" && rec()[0].x > 640) {
-        setIsSecondPlayerReady(true);
+    var left: Label[] = [];
+    var right: Label[] = [];
+
+    var temp = rec();
+    for (var i = 0; i < temp.length; i++) {
+      if (temp[i].x + temp[i].width <= 640) {
+        right.push(temp[i]);
+      } else if (temp[i].x >= 640) {
+        left.push(temp[i]);
       }
+    }
+
+    if (left.length > 0) {
+      var resultL = left.filter((element) => {
+        if (element.label === "scissors") {
+          return true;
+        }
+      });
+      console.log(resultL);
+
+      if (resultL.length > 0) setIsFirstPlayerReady(true);
+      else setIsFirstPlayerReady(false);
+    } else {
+      setIsFirstPlayerReady(false);
+    }
+
+    if (right.length > 0) {
+      var resultR = right.filter((element) => {
+        if (element.label === "scissors") {
+          return true;
+        }
+      });
+      // console.log(resultR);
+
+      if (resultR.length > 0) setIsSecondPlayerReady(true);
+      else setIsSecondPlayerReady(false);
+    } else {
+      setIsSecondPlayerReady(false);
     }
   }, [rec]);
 
   createEffect(() => {
     if (isFirstPlayerReady() && isSecondPlayerReady()) {
       countdownTimer();
+    } else {
+      resetTimer();
     }
   }, [isFirstPlayerReady, isSecondPlayerReady]);
 
@@ -85,11 +126,6 @@ export default function Lobby() {
       }}
     >
       <LeadingButton backToPath="Home" path="/" />
-      {/* <Button onClick={countdownTimer}>Press Me</Button> */}
-      <A href="/game/local" style={{ color: "white", position: "absolute" }}>
-        Game
-      </A>
-
       <Box
         sx={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}
       >
@@ -102,6 +138,7 @@ export default function Lobby() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          transform: "scaleX(-1)",
         }}
       >
         <video
@@ -131,6 +168,7 @@ export default function Lobby() {
                       : item.label == "scissors"
                       ? "#8D72E1"
                       : "#000000",
+                  transform: "scaleX(-1)",
                 }}
               >
                 {item.label}
@@ -143,6 +181,7 @@ export default function Lobby() {
                   top: item.y,
                   left: item.x,
                   border: "3px solid",
+                  transform: "scaleX(-1)",
                   borderColor:
                     item.label == "rock"
                       ? "#FA4141"
@@ -183,10 +222,11 @@ export default function Lobby() {
                 borderRadius: 1,
                 backgroundColor: "rgba(0,0,0,0.5)",
                 color: "white",
+                transform: "scaleX(-1)",
               }}
               variant="h6"
             >
-              Show your 'SCISSORS' gesture in front of your camera
+              Show your 'SCISSORS ✌🏻' gesture in front of your camera
             </Typography>
 
             <Box sx={{ height: "85%", width: "100%" }}>
@@ -206,6 +246,36 @@ export default function Lobby() {
                     width: "1px",
                   }}
                 />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                    alignItems: "center",
+                    transform: "scaleX(-1)",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: "rgba(255,255,255,0.9)",
+                      width: "130px",
+                      height: "130px",
+                      display:
+                        isFirstPlayerReady() && isSecondPlayerReady()
+                          ? "flex"
+                          : "none",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: "50%",
+                    }}
+                  >
+                    <Typography variant="h2" sx={{ fontWeight: 500 }}>
+                      {timer() === 0 ? "✌🏻" : timer()}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
             <Box
@@ -213,6 +283,7 @@ export default function Lobby() {
                 display: "flex",
                 justifyContent: "space-around",
                 width: "100%",
+                transform: "scaleX(-1)",
               }}
             >
               <Box

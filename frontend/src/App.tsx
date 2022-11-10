@@ -15,7 +15,7 @@ export default function App() {
           <Route path="/" component={Home} />
           <Route path="/example" element={<Example title="Example Page" />} />
           <Route path="/lobby/:round" element={<Lobby />} />
-          <Route path="/game/local" element={<LocalGame />} />
+          <Route path="/game/:round" element={<LocalGame />} />
           <Route path="summary" element={<Summary />} />
         </Routes>
       </Router>
