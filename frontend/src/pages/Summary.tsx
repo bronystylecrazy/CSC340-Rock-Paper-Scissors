@@ -10,6 +10,57 @@ import Typography from "@suid/material/Typography";
 const Summary = () => {
   const round = [1, 2, 3, 4, 5];
   const player1Stat = "win";
+  const player2Stat = "lose";
+  const player1 = {
+    name: "Player 1",
+    round: [
+      {
+        result: "win",
+        label: "rock",
+      },
+      {
+        result: "win",
+        label: "paper",
+      },
+      {
+        result: "lose",
+        label: "scissors",
+      },
+      {
+        result: "lose",
+        label: "paper",
+      },
+      {
+        result: "win",
+        label: "scissors",
+      },
+    ],
+  };
+  const player2 = {
+    name: "Player 2",
+    round: [
+      {
+        result: "lose",
+        label: "scissors",
+      },
+      {
+        result: "lose",
+        label: "rock",
+      },
+      {
+        result: "win",
+        label: "rock",
+      },
+      {
+        result: "win",
+        label: "scissors",
+      },
+      {
+        result: "lose",
+        label: "paper",
+      },
+    ],
+  };
   return (
     <>
       <LeadingButton backToPath="Home" path="/" />
@@ -76,13 +127,14 @@ const Summary = () => {
                     px: 2,
                     py: 0.5,
                     borderRadius: 2,
-                    backgroundColor: "rgba(0,0,0,0.1)",
+                    backgroundColor:
+                      player1Stat == "win" ? "#1CB462" : "#FF9B9B",
                   }}
                 >
-                  Player 1
+                  {player1.name}
                 </Typography>
               </Grid>
-              <For each={round}>
+              <For each={player1.round}>
                 {(item) => (
                   <Grid item xs={2}>
                     <Box
@@ -101,12 +153,36 @@ const Summary = () => {
                         py={0.5}
                         borderRadius={1}
                         backgroundColor={
-                          player1Stat == "win" ? "#1CB462" : "#FA4141"
+                          item.result == "win" ? "#1CB462" : "#FF9B9B"
                         }
                       >
-                        Win
+                        {item.result}
                       </Typography>
-                      <img src={rockIcon} alt="" width="120px" />
+                      <Box
+                        width="120px"
+                        height="120px"
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <img
+                          src={
+                            item.label == "rock"
+                              ? rockIcon
+                              : item.label == "paper"
+                              ? paperIcon
+                              : scissorsIcon
+                          }
+                          alt=""
+                          width="100%"
+                          height="100%"
+                          style={{
+                            "object-fit": "contain",
+                          }}
+                        />
+                      </Box>
                     </Box>
                   </Grid>
                 )}
@@ -128,13 +204,14 @@ const Summary = () => {
                     px: 2,
                     py: 0.5,
                     borderRadius: 2,
-                    backgroundColor: "rgba(0,0,0,0.1)",
+                    backgroundColor:
+                      player2Stat == "win" ? "#1CB462" : "#FF9B9B",
                   }}
                 >
-                  Player 2
+                  {player2.name}
                 </Typography>
               </Grid>
-              <For each={round}>
+              <For each={player2.round}>
                 {(item) => (
                   <Grid item xs={2}>
                     <Box
@@ -153,12 +230,36 @@ const Summary = () => {
                         py={0.5}
                         borderRadius={1}
                         backgroundColor={
-                          player1Stat == "win" ? "#1CB462" : "#FA4141"
+                          item.result == "win" ? "#1CB462" : "#FF9B9B"
                         }
                       >
-                        Win
+                        {item.result}
                       </Typography>
-                      <img src={rockIcon} alt="" width="120px" />
+                      <Box
+                        width="120px"
+                        height="120px"
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <img
+                          src={
+                            item.label == "rock"
+                              ? rockIcon
+                              : item.label == "paper"
+                              ? paperIcon
+                              : scissorsIcon
+                          }
+                          alt=""
+                          width="100%"
+                          height="100%"
+                          style={{
+                            "object-fit": "contain",
+                          }}
+                        />
+                      </Box>
                     </Box>
                   </Grid>
                 )}
