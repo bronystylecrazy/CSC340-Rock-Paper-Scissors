@@ -97,7 +97,8 @@ const LocalGame = () => {
           display: "flex",
           width: "100%",
           justifyContent: "space-between",
-          margin: "20px 0",
+          marginTop: "10px",
+          marginBottom: "20px",
           px: "5rem",
         }}
       >
@@ -111,7 +112,7 @@ const LocalGame = () => {
           Player 2
         </Typography>
       </Box>
-      <Container
+      <Box
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -154,8 +155,8 @@ const LocalGame = () => {
             <>
               <Typography
                 position="absolute"
-                top={item.y * 0.9375 - 25}
-                left={item.x * 0.9375}
+                top={item.y - 25}
+                left={item.x}
                 backgroundColor="rgba(255,255,255,0.5)"
                 px={2}
                 sx={{
@@ -174,10 +175,10 @@ const LocalGame = () => {
               <Box
                 sx={{
                   position: "absolute",
-                  width: item.width * 0.9375,
-                  height: item.height * 0.9375,
-                  top: item.y * 0.9375,
-                  left: item.x * 0.9375,
+                  width: item.width,
+                  height: item.height,
+                  top: item.y,
+                  left: item.x,
                   border: "3px solid",
                   borderColor:
                     item.label == "rock"
@@ -309,7 +310,7 @@ const LocalGame = () => {
             width: "1px",
           }}
         ></Box>
-      </Container>
+      </Box>
     </Box>
   );
 };

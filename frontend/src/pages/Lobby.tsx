@@ -5,7 +5,6 @@ import Typography from "@suid/material/Typography";
 import { createSignal, createEffect, For } from "solid-js";
 import { A, useParams } from "@solidjs/router";
 import { Label } from "@/types/label";
-import Button from "@suid/material/Button";
 
 export default function Lobby() {
   const constraints = {
@@ -98,12 +97,11 @@ export default function Lobby() {
           Game will start in {timer()} second{timer() > 1 ? "s" : ""}
         </Typography>
       </Box>
-      <Container
+      <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "0 !important",
         }}
       >
         <video
@@ -120,8 +118,8 @@ export default function Lobby() {
             <>
               <Typography
                 position="absolute"
-                top={item.y * 0.9375 - 25}
-                left={item.x * 0.9375}
+                top={item.y - 25}
+                left={item.x}
                 backgroundColor="rgba(255,255,255,0.5)"
                 px={2}
                 sx={{
@@ -140,10 +138,10 @@ export default function Lobby() {
               <Box
                 sx={{
                   position: "absolute",
-                  width: item.width * 0.9375,
-                  height: item.height * 0.9375,
-                  top: item.y * 0.9375,
-                  left: item.x * 0.9375,
+                  width: item.width,
+                  height: item.height,
+                  top: item.y,
+                  left: item.x,
                   border: "3px solid",
                   borderColor:
                     item.label == "rock"
@@ -264,7 +262,7 @@ export default function Lobby() {
             </Box>
           </Box>
         </Box>
-      </Container>
+      </Box>
       <Typography color="white" mt={2}>
         *Hint: Place your hand horizontally*
       </Typography>
