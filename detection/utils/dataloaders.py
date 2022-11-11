@@ -337,7 +337,9 @@ class LoadImages:
 
 
 class LoadStreams:
+    cap = None
     # YOLOv5 streamloader, i.e. `python detect.py --source 'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP streams`
+
     def __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True, transforms=None, vid_stride=1):
         torch.backends.cudnn.benchmark = True  # faster for fixed-size inference
         self.mode = 'stream'
@@ -359,16 +361,17 @@ class LoadStreams:
             if s == 0:
                 assert not is_colab(), '--source 0 webcam unsupported on Colab. Rerun command in a local environment.'
                 assert not is_kaggle(), '--source 0 webcam unsupported on Kaggle. Rerun command in a local environment.'
-            cap = cv2.VideoCapture(s)
-            assert cap.isOpened(), f'{st}Failed to open {s}'
-            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
-            self.frames[i] = max(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
+            self.cap = cv2.VideoCapture(s)
+            assert self.cap.isOpened(), f'{st}Failed to open {s}'
+            w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
+            self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+                                 0) or float('inf')  # infinite stream fallback
             self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
 
-            _, self.imgs[i] = cap.read()  # guarantee first frame
-            self.threads[i] = Thread(target=self.update, args=([i, cap, s]), daemon=True)
+            _, self.imgs[i] = self.cap.read()  # guarantee first frame
+            self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
             LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
             self.threads[i].start()
         LOGGER.info('')  # newline
@@ -380,6 +383,9 @@ class LoadStreams:
         self.transforms = transforms  # optional
         if not self.rect:
             LOGGER.warning('WARNING ⚠️ Stream shapes differ. For optimal performance supply similarly-shaped streams.')
+
+    def stopCamera(self):
+        self.cap.release()
 
     def update(self, i, cap, stream):
         # Read stream `i` frames in daemon thread

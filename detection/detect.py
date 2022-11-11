@@ -47,16 +47,19 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
+message = ''
+
 
 async def handler(websocket):
-    run(**vars(opt))
     while True:
         message = await websocket.recv()
+        if (message == "detect"):
+            await run(websocket)
         print(message)
 
 
-async def startWebsocket():
-    async with websockets.serve(run, "127.0.0.1", 8001):
+async def start_websocket():
+    async with websockets.serve(handler, "127.0.0.1", 8001):
         await asyncio.Future()  # run forever
 
 
@@ -114,8 +117,8 @@ async def run(websocket):
         view_img = check_imshow(warn=True)
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
 
-        await websocket.send(json.dumps({"source": "webcam", "size": {"width": len(dataset.imgs[0][0]),
-                                                                      "height": len(dataset.imgs[0])}}))
+        websocket.send(json.dumps({"source": "webcam", "size": {"width": len(dataset.imgs[0][0]),
+                                                                "height": len(dataset.imgs[0])}}))
         bs = len(dataset)
     elif screenshot:
         dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
@@ -127,6 +130,7 @@ async def run(websocket):
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     for path, im, im0s, vid_cap, s in dataset:
+
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -197,16 +201,18 @@ async def run(websocket):
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
             # TODO websocket send data
             # if response != []:
+
             await websocket.send(json.dumps(response))
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-
+        command = await websocket.recv()
+        if (command == "stop"):
+            print("stop")
+            return
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
-    if save_txt or save_img:
-        s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
@@ -248,7 +254,7 @@ def parse_opt():
 
 def main(opt):
     check_requirements(exclude=('tensorboard', 'thop'))
-    asyncio.run(startWebsocket())
+    asyncio.run(start_websocket())
 
 
 if __name__ == "__main__":
