@@ -14,11 +14,14 @@ export default function Lobby() {
   };
   const params = useParams();
 
+  const [round, setRound] = createSignal<string>("");
   const [rec, setRec] = createSignal<Label[]>([]);
   const [timer, setTimer] = createSignal(3);
   const [isFirstPlayerReady, setIsFirstPlayerReady] = createSignal(false);
   const [isSecondPlayerReady, setIsSecondPlayerReady] = createSignal(false);
   let timerInterval: any;
+  let socketInterval: any;
+
   const navigate = useNavigate();
 
   const openCamera = async () => {
@@ -39,11 +42,12 @@ export default function Lobby() {
       console.log(error);
     }
   };
+  const socket = new WebSocket("ws://localhost:8001");
 
   const timerFunction = () => {
     if (timer() === 0) {
       clearInterval(timerInterval);
-      navigate(`/game/${params.round}`, { replace: true });
+      navigate(`/game/${round()}`, { replace: true });
     } else {
       setTimer(timer() - 1);
     }
@@ -57,8 +61,15 @@ export default function Lobby() {
     clearInterval(timerInterval);
   };
 
-  const socket = new WebSocket("ws://localhost:8001");
+  // detect, stop
   onMount(() => {
+    socket.onopen = () => {
+      socket.send("detect");
+      socketInterval = setInterval(() => {
+        socket.send("msg");
+      }, 500);
+    };
+
     openCamera();
     try {
       socket.addEventListener("message", (event) => {
@@ -72,6 +83,7 @@ export default function Lobby() {
 
   onCleanup(() => {
     socket.send("close");
+    clearInterval(socketInterval);
     socket.close();
   });
 
@@ -108,7 +120,6 @@ export default function Lobby() {
           return true;
         }
       });
-      // console.log(resultR);
 
       if (resultR.length > 0) setIsSecondPlayerReady(true);
       else setIsSecondPlayerReady(false);
@@ -124,6 +135,20 @@ export default function Lobby() {
       resetTimer();
     }
   }, [isFirstPlayerReady, isSecondPlayerReady]);
+
+  createEffect(() => {
+    if (params.round == "3") {
+      setRound("2");
+    } else if (params.round == "5") {
+      setRound("3");
+    } else if (params.round == "7") {
+      setRound("4");
+    } else if (params.round == "9") {
+      setRound("5");
+    } else {
+      setRound(params.round);
+    }
+  }, []);
 
   return (
     <Box

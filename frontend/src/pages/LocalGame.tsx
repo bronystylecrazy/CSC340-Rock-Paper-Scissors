@@ -1,15 +1,15 @@
 import LeadingButton from "@/components/LeadingButton";
 import Box from "@suid/material/Box";
-import Container from "@suid/material/Container";
 import Typography from "@suid/material/Typography";
 import CircleIcon from "@suid/icons-material/Circle";
 import CircleOutlinedIcon from "@suid/icons-material/CircleOutlined";
 import Checkbox from "@suid/material/Checkbox";
-import { createEffect, createSignal, For, onMount } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, onMount } from "solid-js";
 import { Label } from "@/types/label";
-import Button from "@suid/material/Button";
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { FaSolidArrowRight } from "solid-icons/fa";
+import { GameResults } from "@/types/game";
+import { RPSCheck, RPSMessage } from "@/utils/rpsLogic";
 
 const LocalGame = () => {
   const constraints = {
@@ -17,8 +17,29 @@ const LocalGame = () => {
     height: { min: 400, ideal: 720 },
     aspectRatio: { ideal: 1.7777777778 },
   };
+  const navigate = useNavigate();
+  const params = useParams();
   const [rec, setRec] = createSignal<Label[]>([]);
   const [gameFinish, setGameFinish] = createSignal(false);
+  const [timer, setTimer] = createSignal<number>(5);
+  const [nextRoundTimer, setNextRoundTimer] = createSignal<number>(3);
+  const [firstPlayerState, setFirstPlayerState] = createSignal<string>("");
+  const [currentRound, setCurrentRound] = createSignal<number>(1);
+  const [currentRoundResult, setCurrentRoundResult] = createSignal<string>("");
+  const [secondPlayerState, setSecondPlayerState] = createSignal<string>("");
+  const [playerScore, setPlayerScore] = createSignal<{
+    firstPlayer: number;
+    secondPlayer: number;
+  }>({
+    firstPlayer: 0,
+    secondPlayer: 0,
+  });
+  const [gameResult, setGameResult] = createSignal<GameResults>({
+    rounds: parseInt(params.round),
+    nameWon: "",
+    results: [],
+  });
+  let timerInterval: any;
 
   const openCamera = async () => {
     var video: HTMLVideoElement = document.getElementById(
@@ -38,19 +59,205 @@ const LocalGame = () => {
       console.log(error);
     }
   };
+  const socket = new WebSocket("ws://localhost:8001");
+
   onMount(() => {
-    console.log("onMount");
+    socket.onopen = () => {
+      socket.send("detect");
+      setInterval(() => {
+        socket.send("msg");
+      }, 500);
+    };
     openCamera();
-    const socket = new WebSocket("ws://localhost:8001");
+
     socket.addEventListener("message", (event) => {
       setRec(JSON.parse(event.data));
     });
+    setPlayerScore({
+      firstPlayer:
+        gameResult().results.filter((item) => item.firstPlayer.result == "win")
+          .length ?? 0,
+      secondPlayer:
+        gameResult().results.filter((item) => item.secondPlayer.result == "win")
+          .length ?? 0,
+    });
   });
+
+  onCleanup(() => {
+    socket.send("close");
+    socket.close();
+    var video: HTMLVideoElement = document.getElementById(
+        "video"
+      ) as HTMLVideoElement,
+      vendorURL = window.URL || window.webkitURL;
+    try {
+      navigator.mediaDevices
+        .getUserMedia({
+          video: {},
+        })
+        .then((stream) => {
+          video.srcObject = stream;
+          stream.getVideoTracks()[0].stop();
+          video.src = "";
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  const timerFunction = () => {
+    if (timer() === 0) {
+      clearInterval(timerInterval);
+    } else {
+      setTimer(timer() - 1);
+    }
+  };
+
+  const countdownTimer = () => {
+    timerInterval = setInterval(timerFunction, 1000);
+  };
+
+  const resetTimer = () => {
+    setTimer(3);
+    clearInterval(timerInterval);
+  };
+
+  createEffect(() => {
+    var left: Label[] = [];
+    var right: Label[] = [];
+
+    var temp = rec();
+    for (var i = 0; i < temp.length; i++) {
+      if (temp[i].x + temp[i].width <= 640) {
+        right.push(temp[i]);
+      } else if (temp[i].x >= 640) {
+        left.push(temp[i]);
+      }
+    }
+
+    if (left.length > 0) {
+      setFirstPlayerState(left[left.length - 1].label);
+    } else {
+      setFirstPlayerState("");
+    }
+
+    if (right.length > 0) {
+      setSecondPlayerState(right[right.length - 1].label);
+    } else {
+      setSecondPlayerState("");
+    }
+  }, [rec]);
+
+  createEffect(() => {
+    if (
+      firstPlayerState() !== "" &&
+      secondPlayerState() !== "" &&
+      timer() === 0
+    ) {
+      const tFirstPlayer = firstPlayerState();
+      const tSecondPlayer = secondPlayerState();
+      const result = RPSCheck(tFirstPlayer, tSecondPlayer);
+      setCurrentRoundResult(RPSMessage(result));
+      if (result !== "tie") {
+        setGameResult((prev) => {
+          prev.results.push({
+            round: gameResult().results.length + 1,
+            firstPlayer: {
+              label: tFirstPlayer,
+              result: result,
+            },
+            secondPlayer: {
+              label: tSecondPlayer,
+              result:
+                result === "win" ? "lose" : result === "lose" ? "win" : "tie",
+            },
+          });
+          return prev;
+        });
+        setPlayerScore({
+          firstPlayer:
+            gameResult().results.filter(
+              (item) => item.firstPlayer.result == "win"
+            ).length ?? 0,
+          secondPlayer:
+            gameResult().results.filter(
+              (item) => item.secondPlayer.result == "win"
+            ).length ?? 0,
+        });
+        setCurrentRound(currentRound() + 1);
+      }
+      resetTimer();
+      setGameFinish(true);
+    }
+  }, [timer]);
+
+  createEffect(() => {
+    countdownTimer();
+  }, []);
+
+  createEffect(() => {
+    if (gameFinish()) {
+      resetTimer();
+      const nextRoundTimerInterval = setInterval(() => {
+        if (nextRoundTimer() === 0) {
+          clearInterval(nextRoundTimerInterval);
+          setNextRoundTimer(3);
+          if (
+            playerScore().firstPlayer === parseInt(params.round) ||
+            playerScore().secondPlayer === parseInt(params.round)
+          ) {
+            setGameResult((prev) => {
+              prev.nameWon =
+                playerScore().firstPlayer === parseInt(params.round)
+                  ? "Player 1"
+                  : "Player 2";
+              return prev;
+            });
+            navigate("/summary", {
+              replace: true,
+              state: {
+                gameResult: gameResult(),
+              },
+            });
+            return;
+          }
+          setGameFinish(false);
+          countdownTimer();
+        } else {
+          setNextRoundTimer(nextRoundTimer() - 1);
+        }
+      }, 1000);
+    }
+  }, [gameFinish]);
 
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        position: "relative",
+      }}
     >
+      <Box
+        sx={{
+          backgroundColor: "rgba(255,255,255,0.9)",
+          width: "130px",
+          height: "130px",
+          display: !gameFinish() ? "flex" : "none",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: "50%",
+          position: "absolute",
+          top: "50%",
+          zIndex: "100",
+        }}
+      >
+        <Typography variant="h2" sx={{ fontWeight: 500 }}>
+          {timer() === 0 ? "✌🏻" : timer()}
+        </Typography>
+      </Box>
       <Box
         sx={{
           width: "100%",
@@ -84,16 +291,6 @@ const LocalGame = () => {
           </A>
         </Box>
       </Box>
-      <Button
-        onClick={() => {
-          setGameFinish(!gameFinish());
-        }}
-        sx={{
-          position: "absolute",
-        }}
-      >
-        Finish
-      </Button>
       <Box
         sx={{
           display: "flex",
@@ -108,7 +305,16 @@ const LocalGame = () => {
           Player 1
         </Typography>
         <Typography sx={{ fontWeight: "bold", color: "#fff" }} variant="h5">
-          Best of 3
+          Best of{" "}
+          {params.round == "2"
+            ? 3
+            : params.round == "3"
+            ? 5
+            : params.round == "4"
+            ? 7
+            : params.round == "5"
+            ? 9
+            : params.round}
         </Typography>
         <Typography sx={{ fontWeight: 500, color: "#fff" }} variant="h6">
           Player 2
@@ -146,10 +352,10 @@ const LocalGame = () => {
             }}
           >
             <Typography color="white" variant="h3" fontWeight={500}>
-              Player 1 Won
+              {currentRoundResult()}
             </Typography>
             <Typography mt={3} color="white" variant="h1" fontWeight={500}>
-              3 : 2
+              {playerScore().firstPlayer} : {playerScore().secondPlayer}
             </Typography>
           </Box>
         )}
@@ -222,33 +428,19 @@ const LocalGame = () => {
                 borderBottomLeftRadius: "4px",
               }}
             >
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-                sx={{
-                  "&.Mui-checked": {
-                    color: "#38C149",
-                  },
-                }}
-              />
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-                sx={{
-                  "&.Mui-checked": {
-                    color: "#38C149",
-                  },
-                }}
-              />
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-                sx={{
-                  "&.Mui-checked": {
-                    color: "#959292",
-                  },
-                }}
-              />
+              <For each={new Array(parseInt(params.round))}>
+                {(_) => (
+                  <Checkbox
+                    icon={<CircleOutlinedIcon />}
+                    checkedIcon={<CircleIcon />}
+                    sx={{
+                      "&.Mui-checked": {
+                        color: "#38C149",
+                      },
+                    }}
+                  />
+                )}
+              </For>
             </Box>
             <Typography
               fontWeight="bold"
@@ -259,7 +451,7 @@ const LocalGame = () => {
               py={2}
               borderRadius={1}
             >
-              0
+              {playerScore().firstPlayer}
             </Typography>
             <Typography
               fontWeight="bold"
@@ -271,7 +463,7 @@ const LocalGame = () => {
               color="white"
               backgroundColor="rgba(0, 0, 0, 0.3)"
             >
-              Round 1
+              Round {currentRound()}
             </Typography>
             <Typography
               fontWeight="bold"
@@ -282,7 +474,7 @@ const LocalGame = () => {
               py={2}
               borderRadius={1}
             >
-              0
+              {playerScore().secondPlayer}
             </Typography>
             <Box
               px={2}
@@ -292,18 +484,14 @@ const LocalGame = () => {
                 borderBottomRightRadius: "4px",
               }}
             >
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-              />
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-              />
-              <Checkbox
-                icon={<CircleOutlinedIcon />}
-                checkedIcon={<CircleIcon />}
-              />
+              <For each={new Array(parseInt(params.round))}>
+                {(_) => (
+                  <Checkbox
+                    icon={<CircleOutlinedIcon />}
+                    checkedIcon={<CircleIcon />}
+                  />
+                )}
+              </For>
             </Box>
           </Box>
         </Box>

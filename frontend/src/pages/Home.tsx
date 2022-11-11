@@ -1,5 +1,5 @@
 import Box from "@suid/material/Box";
-import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js";
 import Typography from "@suid/material/Typography";
 import Container from "@suid/material/Container";
 import ModeCard from "@/components/Home/Mode";
@@ -118,11 +118,12 @@ export default function Home() {
                 component="b"
                 fontWeight={500}
                 align="center"
+                marginBottom="2rem"
               >
                 <b>Classic Mode</b> is a local battle against your friend.
                 Hosted on your own computer, no internet required.
               </Typography>
-              <b style={{ "margin-top": ".5rem" }}>ROUNDS</b>
+              {/* <b style={{ "margin-top": ".5rem" }}>Best Of</b> */}
               <Box
                 sx={{
                   display: "flex",
@@ -147,7 +148,7 @@ export default function Home() {
                 variant="contained"
                 onClick={() => navigate("/lobby/" + gameRound())}
               >
-                {gameRound} round{gameRound() < 1 ? "" : "s"}, GO!
+                Best of {gameRound()} , GO!
               </Button>
             </ModeCard>
           </Grid>

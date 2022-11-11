@@ -3,66 +3,29 @@ import paperIcon from "../assets/paper.png";
 import rockIcon from "../assets/rock.png";
 import Box from "@suid/material/Box";
 import Grid from "@suid/material/Grid";
-import { For } from "solid-js";
+import { For, createSignal, createEffect } from "solid-js";
 import Typography from "@suid/material/Typography";
 import Button from "@suid/material/Button";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
+import { GameResults, GameResultsState } from "@/types/game";
 
 const Summary = () => {
   const navigate = useNavigate();
-  const round = [1, 2, 3, 4, 5];
-  const player1 = {
-    name: "Player 1",
-    result: "win",
-    round: [
-      {
-        result: "win",
-        label: "rock",
-      },
-      {
-        result: "win",
-        label: "paper",
-      },
-      {
-        result: "lose",
-        label: "scissors",
-      },
-      {
-        result: "lose",
-        label: "paper",
-      },
-      {
-        result: "win",
-        label: "scissors",
-      },
-    ],
-  };
-  const player2 = {
-    name: "Player 2",
-    result: "lose",
-    round: [
-      {
-        result: "lose",
-        label: "scissors",
-      },
-      {
-        result: "lose",
-        label: "rock",
-      },
-      {
-        result: "win",
-        label: "rock",
-      },
-      {
-        result: "win",
-        label: "scissors",
-      },
-      {
-        result: "lose",
-        label: "paper",
-      },
-    ],
-  };
+  const location = useLocation();
+  const state = location.state as GameResultsState;
+
+  const [gameResult, setGameResult] = createSignal<GameResults>({
+    nameWon: "Default",
+    results: [],
+    rounds: 0,
+  });
+
+  createEffect(() => {
+    if (state.gameResult != null) {
+      setGameResult(state.gameResult);
+    }
+  }, []);
+
   return (
     <>
       <Box
@@ -95,11 +58,11 @@ const Summary = () => {
             }}
           >
             <Grid item xs={2}></Grid>
-            <For each={round}>
+            <For each={gameResult()?.results}>
               {(item) => (
-                <Grid item xs={2}>
+                <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
                   <Typography variant="h5" fontWeight={500} textAlign="center">
-                    Round {item}
+                    Round {item.round}
                   </Typography>
                 </Grid>
               )}
@@ -131,19 +94,21 @@ const Summary = () => {
                     borderRadius: 2,
                     border: "2px solid",
                     borderColor:
-                      player1.result == "win" ? "#1CB462" : "#FF9B9B",
+                      gameResult()?.nameWon == "Player 1"
+                        ? "#1CB462"
+                        : "#FF9B9B",
                     backgroundColor:
-                      player1.result == "win"
+                      gameResult()?.nameWon == "Player 1"
                         ? "rgba(28, 180, 98, 0.4)"
                         : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
-                  {player1.name}
+                  Player 1
                 </Typography>
               </Grid>
-              <For each={player1.round}>
+              <For each={gameResult()?.results}>
                 {(item) => (
-                  <Grid item xs={2}>
+                  <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
                     <Box
                       sx={{
                         display: "flex",
@@ -160,10 +125,12 @@ const Summary = () => {
                         py={0.5}
                         borderRadius={1}
                         backgroundColor={
-                          item.result == "win" ? "#1CB462" : "#FF9B9B"
+                          item.firstPlayer.result == "win"
+                            ? "#1CB462"
+                            : "#FF9B9B"
                         }
                       >
-                        {item.result}
+                        {item.firstPlayer.result}
                       </Typography>
                       <Box
                         width="120px"
@@ -176,9 +143,9 @@ const Summary = () => {
                       >
                         <img
                           src={
-                            item.label == "rock"
+                            item.firstPlayer.label == "rock"
                               ? rockIcon
-                              : item.label == "paper"
+                              : item.firstPlayer.label == "paper"
                               ? paperIcon
                               : scissorsIcon
                           }
@@ -213,19 +180,21 @@ const Summary = () => {
                     borderRadius: 2,
                     border: "2px solid",
                     borderColor:
-                      player2.result == "win" ? "#1CB462" : "#FF9B9B",
+                      gameResult()?.nameWon == "Player 2"
+                        ? "#1CB462"
+                        : "#FF9B9B",
                     backgroundColor:
-                      player2.result == "win"
+                      gameResult()?.nameWon == "Player 2"
                         ? "rgba(28, 180, 98, 0.4)"
                         : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
-                  {player2.name}
+                  Player 2
                 </Typography>
               </Grid>
-              <For each={player2.round}>
+              <For each={gameResult()?.results}>
                 {(item) => (
-                  <Grid item xs={2}>
+                  <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
                     <Box
                       sx={{
                         display: "flex",
@@ -242,10 +211,12 @@ const Summary = () => {
                         py={0.5}
                         borderRadius={1}
                         backgroundColor={
-                          item.result == "win" ? "#1CB462" : "#FF9B9B"
+                          item.secondPlayer.result == "win"
+                            ? "#1CB462"
+                            : "#FF9B9B"
                         }
                       >
-                        {item.result}
+                        {item.secondPlayer.result}
                       </Typography>
                       <Box
                         width="120px"
@@ -258,9 +229,9 @@ const Summary = () => {
                       >
                         <img
                           src={
-                            item.label == "rock"
+                            item.secondPlayer.label == "rock"
                               ? rockIcon
-                              : item.label == "paper"
+                              : item.secondPlayer.label == "paper"
                               ? paperIcon
                               : scissorsIcon
                           }
