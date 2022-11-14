@@ -66,7 +66,7 @@ const LocalGame = () => {
       socket.send("detect");
       setInterval(() => {
         socket.send("msg");
-      }, 500);
+      }, 33.33);
     };
     openCamera();
 

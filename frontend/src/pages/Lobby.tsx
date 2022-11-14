@@ -67,7 +67,7 @@ export default function Lobby() {
       socket.send("detect");
       socketInterval = setInterval(() => {
         socket.send("msg");
-      }, 500);
+      }, 33.33);
     };
 
     openCamera();
