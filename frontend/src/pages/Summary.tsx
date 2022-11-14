@@ -2,7 +2,6 @@ import scissorsIcon from "../assets/scissors.png";
 import paperIcon from "../assets/paper.png";
 import rockIcon from "../assets/rock.png";
 import Box from "@suid/material/Box";
-import Grid from "@suid/material/Grid";
 import { For, createSignal, createEffect } from "solid-js";
 import Typography from "@suid/material/Typography";
 import Button from "@suid/material/Button";
@@ -46,28 +45,42 @@ const Summary = () => {
             borderRadius: 2,
           }}
         >
-          <Grid
-            container
+          <Box
             pt={2}
             pb={2}
             px={2}
             backgroundColor="#C2C8D8"
+            width="100%"
             sx={{
+              display: "flex",
               borderTopLeftRadius: 8,
               borderTopRightRadius: 8,
             }}
           >
-            <Grid item xs={2}></Grid>
-            <For each={gameResult()?.results}>
-              {(item) => (
-                <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
-                  <Typography variant="h5" fontWeight={500} textAlign="center">
-                    Round {item.round}
+            <Box width="15%"></Box>
+            <Box
+              sx={{
+                width: "90%",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                alignItems: "center",
+              }}
+            >
+              <For each={gameResult()?.results}>
+                {(item) => (
+                  <Typography
+                    variant="h5"
+                    fontWeight={500}
+                    textAlign="center"
+                    width="120px"
+                  >
+                    R{item.round}
                   </Typography>
-                </Grid>
-              )}
-            </For>
-          </Grid>
+                )}
+              </For>
+            </Box>
+          </Box>
           <Box
             sx={{
               height: "93%",
@@ -76,16 +89,25 @@ const Summary = () => {
               justifyContent: "space-evenly",
             }}
           >
-            <Grid container px={2}>
-              <Grid
-                item
-                xs={2}
+            <Box
+              pr={2}
+              sx={{
+                display: "flex",
+              }}
+            >
+              <Box
+                width="15%"
+                px={1}
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
+                  flexDirection: "column",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                 }}
               >
+                <Typography variant="h5" textAlign="center">
+                  Player 1
+                </Typography>
                 <Typography
                   variant="h4"
                   sx={{
@@ -103,12 +125,20 @@ const Summary = () => {
                         : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
-                  Player 1
+                  {gameResult()?.nameWon == "Player 1" ? "Win" : "Lose"}
                 </Typography>
-              </Grid>
-              <For each={gameResult()?.results}>
-                {(item) => (
-                  <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
+              </Box>
+              <Box
+                sx={{
+                  width: "90%",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  alignItems: "center",
+                }}
+              >
+                <For each={gameResult()?.results}>
+                  {(item) => (
                     <Box
                       sx={{
                         display: "flex",
@@ -133,8 +163,8 @@ const Summary = () => {
                         {item.firstPlayer.result}
                       </Typography>
                       <Box
-                        width="120px"
-                        height="120px"
+                        width="110px"
+                        height="110px"
                         sx={{
                           display: "flex",
                           justifyContent: "center",
@@ -150,28 +180,37 @@ const Summary = () => {
                               : scissorsIcon
                           }
                           alt=""
-                          width="100%"
-                          height="100%"
+                          width="70%"
+                          height="70%"
                           style={{
                             "object-fit": "contain",
                           }}
                         />
                       </Box>
                     </Box>
-                  </Grid>
-                )}
-              </For>
-            </Grid>
-            <Grid container px={2}>
-              <Grid
-                item
-                xs={2}
+                  )}
+                </For>
+              </Box>
+            </Box>
+            <Box
+              pr={2}
+              sx={{
+                display: "flex",
+              }}
+            >
+              <Box
+                width="15%"
+                px={1}
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
+                  flexDirection: "column",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                 }}
               >
+                <Typography variant="h5" textAlign="center">
+                  Player 2
+                </Typography>
                 <Typography
                   variant="h4"
                   sx={{
@@ -189,12 +228,20 @@ const Summary = () => {
                         : "rgba(255, 155, 155, 0.4)",
                   }}
                 >
-                  Player 2
+                  {gameResult()?.nameWon == "Player 2" ? "Win" : "Lose"}
                 </Typography>
-              </Grid>
-              <For each={gameResult()?.results}>
-                {(item) => (
-                  <Grid item xs={gameResult().results.length > 5 ? 1 : 2}>
+              </Box>
+              <Box
+                sx={{
+                  width: "90%",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  alignItems: "center",
+                }}
+              >
+                <For each={gameResult()?.results}>
+                  {(item) => (
                     <Box
                       sx={{
                         display: "flex",
@@ -219,8 +266,8 @@ const Summary = () => {
                         {item.secondPlayer.result}
                       </Typography>
                       <Box
-                        width="120px"
-                        height="120px"
+                        width="110px"
+                        height="110px"
                         sx={{
                           display: "flex",
                           justifyContent: "center",
@@ -236,18 +283,18 @@ const Summary = () => {
                               : scissorsIcon
                           }
                           alt=""
-                          width="100%"
-                          height="100%"
+                          width="75%"
+                          height="75%"
                           style={{
                             "object-fit": "contain",
                           }}
                         />
                       </Box>
                     </Box>
-                  </Grid>
-                )}
-              </For>
-            </Grid>
+                  )}
+                </For>
+              </Box>
+            </Box>
           </Box>
         </Box>
         <Button

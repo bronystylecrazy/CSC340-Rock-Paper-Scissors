@@ -1,9 +1,6 @@
 import LeadingButton from "@/components/LeadingButton";
 import Box from "@suid/material/Box";
 import Typography from "@suid/material/Typography";
-import CircleIcon from "@suid/icons-material/Circle";
-import CircleOutlinedIcon from "@suid/icons-material/CircleOutlined";
-import Checkbox from "@suid/material/Checkbox";
 import { createEffect, createSignal, For, onCleanup, onMount } from "solid-js";
 import { Label } from "@/types/label";
 import { A, useNavigate, useParams } from "@solidjs/router";
@@ -21,7 +18,7 @@ const LocalGame = () => {
   const params = useParams();
   const [rec, setRec] = createSignal<Label[]>([]);
   const [gameFinish, setGameFinish] = createSignal(false);
-  const [timer, setTimer] = createSignal<number>(5);
+  const [timer, setTimer] = createSignal<number>(7);
   const [nextRoundTimer, setNextRoundTimer] = createSignal<number>(3);
   const [firstPlayerState, setFirstPlayerState] = createSignal<string>("");
   const [currentRound, setCurrentRound] = createSignal<number>(1);
@@ -39,6 +36,18 @@ const LocalGame = () => {
     nameWon: "",
     results: [],
   });
+  const [playerOneScoreBoard, setPlayerOneScoreBoard] = createSignal<boolean[]>(
+    new Array(Number(params.round)).fill(false)
+  );
+  const [playerTwoScoreBoard, setPlayerTwoScoreBoard] = createSignal<boolean[]>(
+    new Array(Number(params.round)).fill(false)
+  );
+  const [playerOneScoreCounter, setPlayerOneScoreCounter] =
+    createSignal<number>(0);
+  const [playerTwoScoreCounter, setPlayerTwoScoreCounter] =
+    createSignal<number>(0);
+
+  let socketInterval: any;
   let timerInterval: any;
 
   const openCamera = async () => {
@@ -59,14 +68,23 @@ const LocalGame = () => {
       console.log(error);
     }
   };
-  const socket = new WebSocket("ws://localhost:8001");
+  let socket = new WebSocket("ws://localhost:8001");
 
   onMount(() => {
     socket.onopen = () => {
       socket.send("detect");
-      setInterval(() => {
-        socket.send("msg");
-      }, 33.33);
+      socketInterval = setInterval(() => {
+        try {
+          socket.send("msg");
+          console.log("sent");
+        } catch (error) {
+          console.log("error in socket");
+          console.log(error);
+
+          socket = new WebSocket("ws://localhost:8001");
+          console.log("reconnect", error);
+        }
+      }, 50);
     };
     openCamera();
 
@@ -84,8 +102,9 @@ const LocalGame = () => {
   });
 
   onCleanup(() => {
+    console.log("This end now");
     socket.send("close");
-    socket.close();
+    clearInterval(socketInterval);
     var video: HTMLVideoElement = document.getElementById(
         "video"
       ) as HTMLVideoElement,
@@ -121,6 +140,15 @@ const LocalGame = () => {
   const resetTimer = () => {
     setTimer(3);
     clearInterval(timerInterval);
+  };
+
+  const updatePlayerOneScore = (index: number) => {
+    var temp1 = playerOneScoreBoard();
+    setPlayerOneScoreBoard(temp1.map((item, i) => (i === index ? true : item)));
+  };
+  const updatePlayerTwoScore = (index: number) => {
+    var temp2 = playerTwoScoreBoard();
+    setPlayerTwoScoreBoard(temp2.map((item, i) => (i === index ? true : item)));
   };
 
   createEffect(() => {
@@ -185,6 +213,13 @@ const LocalGame = () => {
               (item) => item.secondPlayer.result == "win"
             ).length ?? 0,
         });
+        if (result === "win") {
+          setPlayerOneScoreCounter(playerOneScoreCounter() + 1);
+          updatePlayerOneScore(playerOneScoreCounter() - 1);
+        } else {
+          setPlayerTwoScoreCounter(playerTwoScoreCounter() + 1);
+          updatePlayerTwoScore(playerTwoScoreCounter() - 1);
+        }
         setCurrentRound(currentRound() + 1);
       }
       resetTimer();
@@ -203,10 +238,15 @@ const LocalGame = () => {
         if (nextRoundTimer() === 0) {
           clearInterval(nextRoundTimerInterval);
           setNextRoundTimer(3);
+          console.log("1", playerScore().firstPlayer);
+          console.log("2", playerScore().secondPlayer);
+
           if (
             playerScore().firstPlayer === parseInt(params.round) ||
             playerScore().secondPlayer === parseInt(params.round)
           ) {
+            console.log("Game finished");
+
             setGameResult((prev) => {
               prev.nameWon =
                 playerScore().firstPlayer === parseInt(params.round)
@@ -426,20 +466,28 @@ const LocalGame = () => {
                 backgroundColor: "white",
                 borderTopLeftRadius: "4px",
                 borderBottomLeftRadius: "4px",
+                display: "flex",
+                flexDirection: "row-reverse",
+                gap: "15px",
+                justifyContent: "space-between",
+                py: 1,
               }}
             >
-              <For each={new Array(parseInt(params.round))}>
-                {(_) => (
-                  <Checkbox
-                    icon={<CircleOutlinedIcon />}
-                    checkedIcon={<CircleIcon />}
-                    sx={{
-                      "&.Mui-checked": {
-                        color: "#38C149",
-                      },
-                    }}
-                  />
-                )}
+              <For each={playerOneScoreBoard()}>
+                {(item) => {
+                  return (
+                    <Box
+                      sx={{
+                        width: "20px",
+                        height: "20px",
+                        border: "2px solid",
+                        borderColor: item ? "#38C149" : "gray",
+                        borderRadius: 4,
+                        backgroundColor: item ? "#38C149" : "white",
+                      }}
+                    ></Box>
+                  );
+                }}
               </For>
             </Box>
             <Typography
@@ -480,17 +528,29 @@ const LocalGame = () => {
               px={2}
               sx={{
                 backgroundColor: "white",
-                borderTopRightRadius: "4px",
-                borderBottomRightRadius: "4px",
+                borderTopLeftRadius: "4px",
+                borderBottomLeftRadius: "4px",
+                display: "flex",
+                gap: "15px",
+                justifyContent: "space-between",
+                py: 1,
               }}
             >
-              <For each={new Array(parseInt(params.round))}>
-                {(_) => (
-                  <Checkbox
-                    icon={<CircleOutlinedIcon />}
-                    checkedIcon={<CircleIcon />}
-                  />
-                )}
+              <For each={playerTwoScoreBoard()}>
+                {(item) => {
+                  return (
+                    <Box
+                      sx={{
+                        width: "20px",
+                        height: "20px",
+                        border: "2px solid",
+                        borderColor: item ? "#38C149" : "gray",
+                        borderRadius: 4,
+                        backgroundColor: item ? "#38C149" : "white",
+                      }}
+                    ></Box>
+                  );
+                }}
               </For>
             </Box>
           </Box>

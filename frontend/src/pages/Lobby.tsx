@@ -47,7 +47,8 @@ export default function Lobby() {
   const timerFunction = () => {
     if (timer() === 0) {
       clearInterval(timerInterval);
-      navigate(`/game/${round()}`, { replace: true });
+
+      navigate(`/game/${round()}`);
     } else {
       setTimer(timer() - 1);
     }
@@ -106,7 +107,6 @@ export default function Lobby() {
           return true;
         }
       });
-      console.log(resultL);
 
       if (resultL.length > 0) setIsFirstPlayerReady(true);
       else setIsFirstPlayerReady(false);

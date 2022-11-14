@@ -74,8 +74,8 @@ export default function Home() {
               class="animate__animated animate__bounceIn"
               style={{ "animation-delay": ".5s" }}
             >
-              Welcome,{" "}
-              <b style={{ color: "yellowgreen" }}>Sirawit Pratoomsuwan</b>
+              {/* Welcome,{" "}
+              <b style={{ color: "yellowgreen" }}>Sirawit Pratoomsuwan</b> */}
             </h2>
           </Grid>
           <Grid item xs={12} md={6}>
