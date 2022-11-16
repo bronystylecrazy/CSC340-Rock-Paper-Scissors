@@ -305,31 +305,6 @@ const LocalGame = () => {
         }}
       >
         <LeadingButton backToPath="Home" path="/" />
-        <Box
-          sx={{
-            width: "100%",
-            height: "60px",
-            padding: "1rem",
-            display: "flex",
-            justifyContent: "end",
-          }}
-        >
-          <A href="/summary" style={{ "text-decoration": "none" }}>
-            <Box
-              sx={{
-                display: "flex",
-                height: "100%",
-                alignItems: "center",
-                justifyContent: "start",
-                color: "white",
-              }}
-            >
-              <Typography>Summary</Typography>
-              <Box mx={0.5} />
-              <FaSolidArrowRight size="16" />
-            </Box>
-          </A>
-        </Box>
       </Box>
       <Box
         sx={{
