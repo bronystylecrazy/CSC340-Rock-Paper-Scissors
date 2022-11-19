@@ -379,8 +379,9 @@ const LocalGame = () => {
             <>
               <Typography
                 position="absolute"
-                top={item.y - 25}
+                top={item.y - 28}
                 left={item.x}
+                fontSize="20px"
                 backgroundColor="rgba(255,255,255,0.5)"
                 px={2}
                 sx={{
@@ -395,7 +396,7 @@ const LocalGame = () => {
                   transform: "scaleX(-1)",
                 }}
               >
-                {item.label}
+                {item.label} {Number(item.confidence).toFixed(2)}
               </Typography>
               <Box
                 sx={{

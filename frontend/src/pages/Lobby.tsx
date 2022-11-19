@@ -68,7 +68,7 @@ export default function Lobby() {
       socket.send("detect");
       socketInterval = setInterval(() => {
         socket.send("msg");
-      }, 33.33);
+      }, 50);
     };
 
     openCamera();
@@ -188,8 +188,9 @@ export default function Lobby() {
             <>
               <Typography
                 position="absolute"
-                top={item.y - 25}
+                top={item.y - 28}
                 left={item.x}
+                fontSize="20px"
                 backgroundColor="rgba(255,255,255,0.5)"
                 px={2}
                 sx={{
@@ -204,7 +205,7 @@ export default function Lobby() {
                   transform: "scaleX(-1)",
                 }}
               >
-                {item.label}
+                {item.label} {Number(item.confidence).toFixed(2)}
               </Typography>
               <Box
                 sx={{
