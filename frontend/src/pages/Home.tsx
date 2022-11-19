@@ -78,12 +78,18 @@ export default function Home() {
               <b style={{ color: "yellowgreen" }}>Sirawit Pratoomsuwan</b> */}
             </h2>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <ModeCard
               class="animate__animated animate__bounceInLeft"
-              title="CLASSIC"
+              title="Start Game"
               description="Allows you to enjoy with your friend in your local machine."
-              architecture="Local Machine"
+              architecture="Start!"
               maxWidth="450px"
               onClick={chooseClassicMode}
               selected={mode() === 1}
@@ -101,6 +107,7 @@ export default function Home() {
               }}
               onClose={() => alert(0)}
               onMouseEnter={() => setMode(1)}
+              onMouseLeave={() => setMode(0)}
             >
               <Box
                 sx={{
@@ -151,8 +158,8 @@ export default function Home() {
                 Best of {gameRound()} , GO!
               </Button>
             </ModeCard>
-          </Grid>
-          <Grid
+          </Box>
+          {/* <Grid
             item
             xs={12}
             md={6}
@@ -328,7 +335,7 @@ export default function Home() {
                 </Box>
               </Show>
             </ModeCard>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
     </Box>
