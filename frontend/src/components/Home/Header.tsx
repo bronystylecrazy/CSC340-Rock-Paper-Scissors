@@ -18,6 +18,7 @@ import Spacer from "../customs/Spacer";
 export type HomeHeaderProps = {
   children?: JSXElement;
   title?: string;
+  setCredit: (value: boolean) => void;
 } & BoxProps;
 
 /**
@@ -29,6 +30,13 @@ const HomeHeader: Component<HomeHeaderProps> = (props) => {
 
   /** Split props for Box's and `ExampleLanding`'s. **/
   const [headerProps, rest] = splitProps(props, ["title", "children"]);
+
+  function handleSearch() {
+    open(
+      "https://www.canva.com/design/DAFSZCgsbk0/lWPtrZdKTkrBlTZOoB9Ljg/view?utm_content=DAFSZCgsbk0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink",
+      "_blank"
+    );
+  }
 
   return (
     <Box
@@ -49,6 +57,7 @@ const HomeHeader: Component<HomeHeaderProps> = (props) => {
         color="info"
         class="animate__animated animate__bounceInDown"
         sx={{ animationDelay: ".25s" }}
+        onClick={handleSearch}
       >
         <HiSolidQuestionMarkCircle size="32" />
       </Button>
@@ -68,6 +77,7 @@ const HomeHeader: Component<HomeHeaderProps> = (props) => {
           "&:hover": { background: "#555" },
           animationDelay: ".25s",
         }}
+        onClick={() => props.setCredit(true)}
       >
         <HiSolidCog size="32" />
       </Button>

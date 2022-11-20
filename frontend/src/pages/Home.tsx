@@ -14,6 +14,7 @@ import FormControlLabel from "@suid/material/FormControlLabel";
 import { useNavigate } from "@solidjs/router";
 import localPlayBg from "src/assets/local-play.png";
 import onlinePlayBg from "src/assets/online-play.png";
+import Credit from "@/components/Home/Credit";
 
 export default function Home() {
   const [title, setTitle] = createSignal("HolyRPS");
@@ -24,13 +25,13 @@ export default function Home() {
   const [isPrivate, setPrivate] = createSignal(false);
   const [isHost, setHost] = createSignal(false);
   const navigate = useNavigate();
-  const timer = setInterval(() => {
-    // setCount((count) => count + 1);
-  }, 10);
+  // const timer = setInterval(() => {
+  // setCount((count) => count + 1);
+  // }, 10);
 
-  onCleanup(() => {
-    clearInterval(timer);
-  });
+  // onCleanup(() => {
+  //   clearInterval(timer);
+  // });
 
   function chooseClassicMode() {
     setMode(1);
@@ -39,6 +40,8 @@ export default function Home() {
   function chooseRankingMode() {
     setMode(2);
   }
+
+  const [showCredit, setCredit] = createSignal(false);
 
   return (
     <Box
@@ -49,7 +52,8 @@ export default function Home() {
         alignItems: "center",
       }}
     >
-      <HomeHeader />
+      <Credit show={showCredit()} setCredit={setCredit} />
+      <HomeHeader setCredit={setCredit} />
       <Container>
         <Grid container spacing={4}>
           <Grid

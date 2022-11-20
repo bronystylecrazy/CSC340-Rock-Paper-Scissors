@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "sidecar:build": "pyinstaller -F ../detection/detect.py --distpath src-tauri/bin/python --clean -n test-x86_64-pc-windows-msvc"
   },
   "license": "MIT",
   "devDependencies": {
